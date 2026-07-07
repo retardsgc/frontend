@@ -15,12 +15,10 @@ export const useFavicon = () => {
 
           const result = await response.json();
           if (result.success && result.data?.branding) {
-            const { faviconUrl, siteName } = result.data.branding;
+            const { faviconUrl, siteName, name } = result.data.branding;
             
-            // Dynamically update document title if present
-            if (siteName) {
-              document.title = siteName;
-            }
+            // Dynamically update document title
+            document.title = siteName || name || "NutriNuts";
 
             if (faviconUrl) {
               // Get or create favicon link element
