@@ -18,7 +18,7 @@ export const useFavicon = () => {
             const { faviconUrl, siteName, name } = result.data.branding;
             
             // Dynamically update document title
-            document.title = siteName || name || "NutriNuts";
+            document.title = siteName || name || "Ecomus";
 
             if (faviconUrl) {
               // Get or create favicon link element
