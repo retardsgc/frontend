@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ensure no default browser spacing around the page */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: white;
+}
+
+/* Line clamp utility */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Hero Carousel Animations */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Remove tiny white gap above fixed AnnouncementBar without changing JSX */
+[role="region"][aria-label="Site announcements"].-top-px {
+  top: 0 !important;
+}
+
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.7s ease-out forwards;
+}
+
+/* Custom carousel card sizes */
+.carousel-card-active {
+  width: 1300px !important;
+  height: 740px !important;
+  min-width: 1300px !important;
+  min-height: 740px !important;
+  max-width: 1300px !important;
+  max-height: 740px !important;
+}
+
+.carousel-card-inactive {
+  width: 1300px !important;
+  height: 740px !important;
+  min-width: 1300px !important;
+  min-height: 740px !important;
+  max-width: 1300px !important;
+  max-height: 740px !important;
+}
+
+/* Mobile responsive card sizes */
+@media (max-width: 768px) {
+  .carousel-card-active {
+    width: 350px !important;
+    height: 500px !important;
+    min-width: 350px !important;
+    min-height: 500px !important;
+    max-width: 350px !important;
+    max-height: 500px !important;
+  }
+
+  .carousel-card-inactive {
+    width: 350px !important;
+    height: 500px !important;
+    min-width: 350px !important;
+    min-height: 500px !important;
+    max-width: 350px !important;
+    max-height: 500px !important;
+  }
+}
+
+/* Tablet responsive card sizes */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .carousel-card-active {
+    width: 600px !important;
+    height: 600px !important;
+    min-width: 600px !important;
+    min-height: 600px !important;
+    max-width: 600px !important;
+    max-height: 600px !important;
+  }
+
+  .carousel-card-inactive {
+    width: 600px !important;
+    height: 600px !important;
+    min-width: 600px !important;
+    min-height: 600px !important;
+    max-width: 600px !important;
+    max-height: 600px !important;
+  }
+}
+
+.animation-delay-100 {
+  animation-delay: 0.1s;
+}
+
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animation-delay-300 {
+  animation-delay: 0.3s;
+}
+
+/* Announcement Bar Animation - Seamless infinite scroll */
+@keyframes scrollLeft {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-scroll-left {
+  animation: scrollLeft linear infinite;
+}
+
+.animate-scroll {
+  animation: scrollLeft 25s linear infinite;
+}
+
+/* Testimonial Container Width - 3px extra at each end compared to divider */
+.testimonial-container {
+  width: calc(92% + 6px);
+}
+
+@media (min-width: 640px) {
+  .testimonial-container {
+    width: calc(80% + 6px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .testimonial-container {
+    width: calc(83.333% + 6px);
+  }
+}
+
+/* Hide scrollbar for tabs */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+  overflow-y: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+}

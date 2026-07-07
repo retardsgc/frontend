@@ -1,0 +1,509 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Three Device Wireless Charger",
+      "price": 49.99,
+      "originalPrice": 69.99,
+      "description": "Charge up to three devices simultaneously with this premium wireless charging station. Features fast charging technology and sleek design.",
+      "category": "Charging Solutions",
+      "categoryId": 1,
+      "images": [
+        "/images/three-device-wireless-charger.png"
+      ],
+      "colors": [
+        {
+          "name": "Black",
+          "value": "#000000"
+        },
+        {
+          "name": "White",
+          "value": "#ffffff"
+        }
+      ],
+      "sizes": [],
+      "inStock": true,
+      "rating": 4.5,
+      "reviews": 128,
+      "features": [
+        "Fast charging",
+        "Multi-device support",
+        "LED indicator"
+      ],
+      "specifications": {
+        "Power Output": "15W per device",
+        "Compatibility": "Qi-enabled devices",
+        "Material": "Premium ABS plastic"
+      },
+      "tags": [
+        "wireless",
+        "charging",
+        "multi-device"
+      ],
+      "bestseller": true,
+      "featured": true
+    },
+    {
+      "id": 2,
+      "name": "Two Device Wireless Charger",
+      "price": 34.99,
+      "originalPrice": 49.99,
+      "description": "Simultaneously charge two devices with this efficient wireless charging pad. Perfect for your phone and smartwatch.",
+      "category": "Charging Solutions",
+      "categoryId": 1,
+      "images": [
+        "/images/two-device-wireless-charger.png"
+      ],
+      "colors": [
+        {
+          "name": "Black",
+          "value": "#000000"
+        },
+        {
+          "name": "White",
+          "value": "#ffffff"
+        }
+      ],
+      "sizes": [],
+      "inStock": true,
+      "rating": 4.3,
+      "reviews": 95,
+      "features": [
+        "Dual charging",
+        "Compact design",
+        "Non-slip base"
+      ],
+      "specifications": {
+        "Power Output": "10W per device",
+        "Compatibility": "Qi-enabled devices",
+        "Material": "Silicone + ABS"
+      },
+      "tags": [
+        "wireless",
+        "charging",
+        "dual"
+      ],
+      "bestseller": false,
+      "featured": true
+    },
+    {
+      "id": 3,
+      "name": "Wireless Earbuds Pro",
+      "price": 129.99,
+      "originalPrice": 159.99,
+      "description": "Premium wireless earbuds with active noise cancellation, superior sound quality, and all-day battery life.",
+      "category": "Audio Devices",
+      "categoryId": 2,
+      "images": [
+        "/images/wireless-white-beats-earbuds.png"
+      ],
+      "colors": [
+        {
+          "name": "Black",
+          "value": "#000000"
+        },
+        {
+          "name": "White",
+          "value": "#ffffff"
+        },
+        {
+          "name": "Blue",
+          "value": "#3b82f6"
+        }
+      ],
+      "sizes": [
+        "Small",
+        "Medium",
+        "Large"
+      ],
+      "inStock": true,
+      "rating": 4.7,
+      "reviews": 256,
+      "features": [
+        "Active noise cancellation",
+        "24-hour battery",
+        "Water resistant"
+      ],
+      "specifications": {
+        "Battery Life": "8 hours (24 with case)",
+        "Connectivity": "Bluetooth 5.0",
+        "Water Resistance": "IPX4"
+      },
+      "tags": [
+        "earbuds",
+        "wireless",
+        "noise-cancelling"
+      ],
+      "bestseller": true,
+      "featured": true
+    },
+    {
+      "id": 4,
+      "name": "Wireless White Beats Earbuds",
+      "price": 89.99,
+      "originalPrice": 119.99,
+      "description": "Experience premium audio with these wireless earbuds featuring advanced drivers, comfortable fit, and long battery life.",
+      "category": "Audio Devices",
+      "categoryId": 2,
+      "images": [
+        "/images/wireless-white-beats-earbuds.png"
+      ],
+      "colors": [
+        {
+          "name": "White",
+          "value": "#ffffff"
+        },
+        {
+          "name": "Black",
+          "value": "#000000"
+        }
+      ],
+      "sizes": [
+        "Small",
+        "Medium",
+        "Large"
+      ],
+      "inStock": true,
+      "rating": 4.4,
+      "reviews": 187,
+      "features": [
+        "Premium sound",
+        "Comfortable fit",
+        "Quick charging"
+      ],
+      "specifications": {
+        "Battery Life": "6 hours (18 with case)",
+        "Connectivity": "Bluetooth 5.0",
+        "Driver Size": "8.2mm"
+      },
+      "tags": [
+        "earbuds",
+        "wireless",
+        "audio"
+      ],
+      "bestseller": false,
+      "featured": false
+    },
+    {
+      "id": 5,
+      "name": "Smart Watch Series Pro",
+      "price": 299.99,
+      "originalPrice": 399.99,
+      "description": "Advanced smartwatch with health monitoring, GPS tracking, water resistance, and customizable watch faces.",
+      "category": "Wearables",
+      "categoryId": 3,
+      "images": [
+        "/images/smart-watch-strap.png"
+      ],
+      "colors": [
+        {
+          "name": "Black",
+          "value": "#000000"
+        },
+        {
+          "name": "Silver",
+          "value": "#c0c0c0"
+        },
+        {
+          "name": "Gold",
+          "value": "#ffd700"
+        }
+      ],
+      "sizes": [
+        "38mm",
+        "42mm"
+      ],
+      "inStock": true,
+      "rating": 4.6,
+      "reviews": 342,
+      "features": [
+        "Heart rate monitor",
+        "GPS tracking",
+        "Water resistant"
+      ],
+      "specifications": {
+        "Battery Life": "18 hours",
+        "Water Resistance": "50m",
+        "Display": "Always-on Retina"
+      },
+      "tags": [
+        "smartwatch",
+        "health",
+        "fitness"
+      ],
+      "bestseller": true,
+      "featured": true
+    },
+    {
+      "id": 6,
+      "name": "USB-C Cable",
+      "price": 12.99,
+      "originalPrice": 19.99,
+      "description": "High-quality USB-C cable for fast charging and data transfer. Compatible with all USB-C devices.",
+      "category": "Charging Solutions",
+      "categoryId": 1,
+      "images": [
+        "/images/usb-cable.png"
+      ],
+      "colors": [
+        {
+          "name": "Black",
+          "value": "#000000"
+        },
+        {
+          "name": "White",
+          "value": "#ffffff"
+        }
+      ],
+      "sizes": [
+        "1m",
+        "2m"
+      ],
+      "inStock": true,
+      "rating": 4.2,
+      "reviews": 89,
+      "features": [
+        "Fast charging",
+        "Data transfer",
+        "Durable"
+      ],
+      "specifications": {
+        "Length": "1m/2m options",
+        "Power": "100W max",
+        "Data": "USB 3.1 Gen 2"
+      },
+      "tags": [
+        "cable",
+        "usb-c",
+        "charging"
+      ],
+      "bestseller": false,
+      "featured": false
+    },
+    {
+      "id": 7,
+      "name": "Phone Case",
+      "price": 24.99,
+      "originalPrice": 34.99,
+      "description": "Protective phone case with shock absorption and precise cutouts for all ports and buttons.",
+      "category": "Accessories",
+      "categoryId": 4,
+      "images": [
+        "/images/phone-case.png"
+      ],
+      "colors": [
+        {
+          "name": "Black",
+          "value": "#000000"
+        },
+        {
+          "name": "Blue",
+          "value": "#3b82f6"
+        },
+        {
+          "name": "Red",
+          "value": "#ef4444"
+        },
+        {
+          "name": "Clear",
+          "value": "#ffffff"
+        }
+      ],
+      "sizes": [
+        "iPhone 13",
+        "iPhone 14",
+        "Samsung S21"
+      ],
+      "inStock": true,
+      "rating": 4.3,
+      "reviews": 156,
+      "features": [
+        "Shock absorption",
+        "Precise cutouts",
+        "Anti-yellowing"
+      ],
+      "specifications": {
+        "Material": "TPU + Polycarbonate",
+        "Drop Protection": "6ft",
+        "Compatibility": "Multiple models"
+      },
+      "tags": [
+        "phone case",
+        "protection",
+        "accessory"
+      ],
+      "bestseller": false,
+      "featured": false
+    },
+    {
+      "id": 8,
+      "name": "Charger Cable",
+      "price": 8.99,
+      "originalPrice": 14.99,
+      "description": "Reliable charging cable for all your devices. Fast charging and durable construction.",
+      "category": "Charging Solutions",
+      "categoryId": 1,
+      "images": [
+        "/images/charger-cable.png"
+      ],
+      "colors": [
+        {
+          "name": "Black",
+          "value": "#000000"
+        },
+        {
+          "name": "White",
+          "value": "#ffffff"
+        }
+      ],
+      "sizes": [
+        "1m",
+        "2m"
+      ],
+      "inStock": true,
+      "rating": 4.1,
+      "reviews": 203,
+      "features": [
+        "Fast charging",
+        "Durable",
+        "Universal"
+      ],
+      "specifications": {
+        "Length": "1m/2m options",
+        "Power": "60W max",
+        "Compatibility": "Universal"
+      },
+      "tags": [
+        "cable",
+        "charging",
+        "universal"
+      ],
+      "bestseller": false,
+      "featured": false
+    },
+    {
+      "id": 9,
+      "name": "Watch Strap",
+      "price": 19.99,
+      "originalPrice": 29.99,
+      "description": "Comfortable and stylish watch strap made from premium materials. Easy to install and adjust.",
+      "category": "Accessories",
+      "categoryId": 4,
+      "images": [
+        "/images/watch-strap.png"
+      ],
+      "colors": [
+        {
+          "name": "Black",
+          "value": "#000000"
+        },
+        {
+          "name": "Brown",
+          "value": "#8b4513"
+        },
+        {
+          "name": "Blue",
+          "value": "#3b82f6"
+        }
+      ],
+      "sizes": [
+        "20mm",
+        "22mm",
+        "24mm"
+      ],
+      "inStock": true,
+      "rating": 4.4,
+      "reviews": 78,
+      "features": [
+        "Comfortable",
+        "Adjustable",
+        "Quick release"
+      ],
+      "specifications": {
+        "Material": "Silicone",
+        "Width": "20mm/22mm/24mm",
+        "Clasp": "Quick release"
+      },
+      "tags": [
+        "watch strap",
+        "accessory",
+        "comfortable"
+      ],
+      "bestseller": false,
+      "featured": false
+    },
+    {
+      "id": 10,
+      "name": "Red Beats AirPods",
+      "price": 159.99,
+      "originalPrice": 199.99,
+      "description": "Premium wireless earbuds with signature Beats sound. Features active noise cancellation and spatial audio.",
+      "category": "Audio Devices",
+      "categoryId": 2,
+      "images": [
+        "/images/red-beats-airpods.png"
+      ],
+      "colors": [
+        {
+          "name": "Red",
+          "value": "#ef4444"
+        },
+        {
+          "name": "Black",
+          "value": "#000000"
+        },
+        {
+          "name": "White",
+          "value": "#ffffff"
+        }
+      ],
+      "sizes": [
+        "Small",
+        "Medium",
+        "Large"
+      ],
+      "inStock": true,
+      "rating": 4.8,
+      "reviews": 189,
+      "features": [
+        "Active noise cancellation",
+        "Spatial audio",
+        "Long battery"
+      ],
+      "specifications": {
+        "Battery Life": "6 hours (24 with case)",
+        "Connectivity": "Bluetooth 5.0",
+        "Water Resistance": "IPX4"
+      },
+      "tags": [
+        "earbuds",
+        "beats",
+        "premium"
+      ],
+      "bestseller": true,
+      "featured": true
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "Charging Solutions",
+      "description": "Wireless chargers, cables, and charging accessories"
+    },
+    {
+      "id": 2,
+      "name": "Audio Devices",
+      "description": "Headphones, earbuds, and audio accessories"
+    },
+    {
+      "id": 3,
+      "name": "Wearables",
+      "description": "Smartwatches and fitness trackers"
+    },
+    {
+      "id": 4,
+      "name": "Accessories",
+      "description": "Phone cases, watch straps, and other accessories"
+    }
+  ]
+}
