@@ -3,17 +3,17 @@
   "outputDirectory": "dist",
   "build": {
     "env": {
-      "VITE_API_BASE_URL": "https://ecommerce-monorepo-kzb8.onrender.com/api"
+      "VITE_API_BASE_URL": "https://backend-ghv0.onrender.com/api"
     }
   },
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://ecommerce-monorepo-kzb8.onrender.com/api/:path*"
+      "destination": "https://backend-ghv0.onrender.com/api/:path*"
     },
     {
       "source": "/images/:path*",
-      "destination": "https://ecommerce-monorepo-kzb8.onrender.com/images/:path*"
+      "destination": "https://backend-ghv0.onrender.com/images/:path*"
     },
     {
       "source": "/(.*)",
