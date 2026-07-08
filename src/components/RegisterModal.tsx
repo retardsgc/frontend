@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import authService from '../services/authService';
 
 interface RegisterModalProps {
@@ -458,7 +457,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onSucces
                   {otp.map((digit, index) => (
                     <input
                       key={index}
-                      ref={(el) => (otpInputRefs.current[index] = el)}
+                      ref={(el) => { otpInputRefs.current[index] = el; }}
                       type="text"
                       inputMode="numeric"
                       maxLength={6}

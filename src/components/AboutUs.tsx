@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 interface Value {
   icon: string;
   title: string;
@@ -78,7 +80,7 @@ const AboutUs: React.FC = () => {
     const fetchAboutUs = async () => {
       try {
         console.log('Fetching About Us data from /api/aboutus...');
-        const response = await fetch('/api/aboutus');
+        const response = await fetch(`${API_BASE_URL}/aboutus`);
         const result = await response.json();
         console.log('About Us API response:', result);
         if (result.success) {

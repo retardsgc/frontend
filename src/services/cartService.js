@@ -1,3 +1,4 @@
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 const STORAGE_KEY = 'guestCart';
 
 // Read cart items from localStorage
@@ -95,7 +96,7 @@ class CartService {
     }
     if (!itemPrice) {
       try {
-        const res = await fetch(`/api/products/${productId}`);
+        const res = await fetch(`${API_BASE}/products/${productId}`);
         const json = await res.json();
         itemPrice = (json.data || json)?.price || 0;
       } catch {}
@@ -124,7 +125,7 @@ class CartService {
 
       if (!name) {
         try {
-          const res = await fetch(`/api/products/${productId}`);
+          const res = await fetch(`${API_BASE}/products/${productId}`);
           const json = await res.json();
           const p = json.data || json;
           name = p.name || 'Product';

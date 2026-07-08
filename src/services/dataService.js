@@ -2,7 +2,7 @@
 // This service handles all data operations for the e-commerce platform
 // Updated to use backend API endpoints instead of static JSON files
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // Generic API request function with error handling
 const apiRequest = async (endpoint, options = {}) => {

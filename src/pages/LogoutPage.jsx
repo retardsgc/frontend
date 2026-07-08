@@ -11,6 +11,7 @@ const LogoutPage = () => {
   };
 
   const handleLogoutConfirm = () => {
+    authService.logout();
     setShowConfirmation(false);
   };
 

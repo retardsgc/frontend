@@ -21,6 +21,7 @@ const CartPage = () => {
   }, []);
 
   const fetchCart = async () => {
+    setError('');
     try {
       setLoading(true);
       const response = await cartService.getCart();
@@ -36,6 +37,7 @@ const CartPage = () => {
 
   const handleQuantityChange = async (itemId, newQuantity) => {
     if (newQuantity < 1) return;
+    setError('');
     
     try {
       setUpdatingItem(itemId);
@@ -51,6 +53,7 @@ const CartPage = () => {
   };
 
   const handleRemoveItem = async (itemId) => {
+    setError('');
     try {
       const response = await cartService.removeFromCart(itemId);
       if (response.success) {
@@ -63,6 +66,7 @@ const CartPage = () => {
 
   const handleClearCart = async () => {
     setShowClearConfirm(false);
+    setError('');
     try {
       const response = await cartService.clearCart();
       if (response.success) {

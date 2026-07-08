@@ -5,6 +5,8 @@ import { Address, AddressFormData } from '../types/Address';
 import LogoutConfirmation from './LogoutConfirmation';
 import Toast from './Toast';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 interface UserData {
   _id: string;
   name: string;
@@ -126,7 +128,7 @@ const AccountPage = () => {
   const fetchUserData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/auth/me', {
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -180,7 +182,7 @@ const AccountPage = () => {
     setOrdersLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/orders', {
+      const response = await fetch(`${API_BASE_URL}/orders`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -287,7 +289,7 @@ const AccountPage = () => {
       const token = localStorage.getItem('token');
       
       // Update profile using correct endpoint (PATCH /api/auth/updateMe)
-      const profileResponse = await fetch('/api/auth/updateMe', {
+      const profileResponse = await fetch(`${API_BASE_URL}/auth/updateMe`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -312,7 +314,7 @@ const AccountPage = () => {
         }
         
         // Use correct endpoint (PATCH /api/auth/updatePassword)
-        const passwordResponse = await fetch('/api/auth/updatePassword', {
+        const passwordResponse = await fetch(`${API_BASE_URL}/auth/updatePassword`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',

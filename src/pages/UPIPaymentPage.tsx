@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 const UPIPaymentPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,7 +31,7 @@ const UPIPaymentPage: React.FC = () => {
 
   const loadPaymentSettings = async () => {
     try {
-      const response = await fetch('/api/payment-settings/mode');
+      const response = await fetch(`${API_BASE_URL}/payment-settings/mode`);
       const data = await response.json();
       
       if (data.success && data.data.paymentMode === 'manual_upi') {
@@ -90,7 +92,7 @@ const UPIPaymentPage: React.FC = () => {
       setError('');
 
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/payment-settings/submit-upi', {
+      const response = await fetch(`${API_BASE_URL}/payment-settings/submit-upi`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

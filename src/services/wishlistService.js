@@ -1,3 +1,4 @@
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 const STORAGE_KEY = 'guestWishlist';
 
 // Read wishlist product IDs from localStorage
@@ -66,7 +67,7 @@ class WishlistService {
 
     // Fetch product data from API
     try {
-      const res = await fetch(`/api/products/${productId}`);
+      const res = await fetch(`${API_BASE}/products/${productId}`);
       const json = await res.json();
       const product = json.data || json;
       items.push(product);

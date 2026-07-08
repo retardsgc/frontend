@@ -14,6 +14,7 @@ import AboutUs from './components/AboutUs.tsx'
 import FAQPage from './components/FAQPage.tsx'
 import ProductListingPage from './components/ProductListingPage.tsx'
 import ProductDetailPage from './components/ProductDetailPage.tsx'
+import AccountPage from './components/AccountPage.tsx'
 import WishlistPage from './pages/WishlistPage'
 import CartPage from './pages/CartPage'
 import CheckoutPage from './pages/CheckoutPage'
@@ -22,7 +23,9 @@ import OrderConfirmationPage from './pages/OrderConfirmationPage'
 import OrderTracking from './components/OrderTracking'
 import PoliciesPage from './pages/PoliciesPage'
 import NotFoundPage from './pages/NotFoundPage'
+import WelcomePopup from './components/WelcomePopup'
 import './App.css'
+import authService from './services/authService'
 import { useFavicon } from './hooks/useFavicon'
 
 // Scroll to top component - scrolls to top on route change
@@ -52,11 +55,22 @@ const HomePage: React.FC = () => (
 );
 
 const App: React.FC = () => {
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  const [welcomeUsername, setWelcomeUsername] = useState('');
   const [announcementHeight, setAnnouncementHeight] = useState<number>(0);
   const [cartLimitToast, setCartLimitToast] = useState<{ message: string; isVisible: boolean }>({ message: '', isVisible: false });
 
   // Load favicon from site config
   useFavicon();
+
+  // Gracefully handle direct visits to /login or /signup by opening modals
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/login' || path === '/signup') {
+      window.history.replaceState(null, '', '/');
+      window.dispatchEvent(new Event(path === '/signup' ? 'auth:openRegister' : 'auth:openLogin'));
+    }
+  }, []);
 
   // Listen for cart limit exceeded events from cartService
   useEffect(() => {
@@ -79,6 +93,30 @@ const App: React.FC = () => {
     return () => window.removeEventListener('announcementbar:height', handler as EventListener);
   }, []);
 
+  // Listen for login events to show welcome popup (only once per user)
+  useEffect(() => {
+    const handleAuthChange = () => {
+      const user = authService.getCurrentUserFromStorage();
+      if (user && user.name) {
+        const flagKey = `welcomeShown:${user._id || user.id || user.email || user.name}`;
+        if (!localStorage.getItem(flagKey)) {
+          setWelcomeUsername(user.name);
+          setShowWelcomePopup(true);
+          localStorage.setItem(flagKey, '1');
+        }
+      }
+    };
+
+    window.addEventListener('auth:changed', handleAuthChange);
+    return () => {
+      window.removeEventListener('auth:changed', handleAuthChange);
+    };
+  }, []);
+
+  const handleWelcomePopupClose = () => {
+    setShowWelcomePopup(false);
+  };
+
   return (
     <Router>
       <ScrollToTop />
@@ -94,6 +132,7 @@ const App: React.FC = () => {
           <Route path="/products" element={<ProductListingPage />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
           <Route path="/shop" element={<ProductListingPage />} />
+          <Route path="/account" element={<AccountPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
@@ -109,6 +148,13 @@ const App: React.FC = () => {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <Footer />
+
+        {/* Welcome Popup */}
+        <WelcomePopup
+          username={welcomeUsername}
+          isVisible={showWelcomePopup}
+          onClose={handleWelcomePopupClose}
+        />
       </div>
       <Toast
         message={cartLimitToast.message}

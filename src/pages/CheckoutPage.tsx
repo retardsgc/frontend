@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import cartService from '../services/cartService';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 interface CartItem {
   _id: string;
   product: {
@@ -80,7 +82,7 @@ const CheckoutPage: React.FC = () => {
       // Load cart and payment settings in parallel
       const [cartResponse, paymentSettingsResponse] = await Promise.all([
         cartService.getCart(),
-        fetch('/api/payment-settings/mode').then(r => r.json()).catch(() => ({ success: false }))
+        fetch(`${API_BASE_URL}/payment-settings/mode`).then(r => r.json()).catch(() => ({ success: false }))
       ]);
       
       if (cartResponse.success && cartResponse.data) {
@@ -191,7 +193,7 @@ const CheckoutPage: React.FC = () => {
       }));
 
       // Create guest order
-      const response = await fetch('/api/orders/guest', {
+      const response = await fetch(`${API_BASE_URL}/orders/guest`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -216,7 +218,7 @@ const CheckoutPage: React.FC = () => {
 
       // COD flow: confirm order without online payment
       if (paymentMethod === 'cod') {
-        const codResponse = await fetch('/api/payments/cod', {
+        const codResponse = await fetch(`${API_BASE_URL}/payments/cod`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

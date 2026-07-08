@@ -1,15 +1,24 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useNavigation, useBranding } from '../hooks/useSiteConfig';
+import authService from '../services/authService';
 import wishlistService from '../services/wishlistService';
 import cartService from '../services/cartService';
+import LoginModal from './LoginModal.tsx';
+import RegisterModal from './RegisterModal';
 import SearchSidebar from './SearchSidebar';
+import LogoutConfirmation from './LogoutConfirmation';
 
 const Navbar: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [cartCount, setCartCount] = useState(0);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const [announcementBarHeight, setAnnouncementBarHeight] = useState(0);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const toggleButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -48,8 +57,19 @@ const Navbar: React.FC = () => {
 
   // No accordion behavior on mobile sidenav, so no state needed here
 
-  // Load wishlist and cart counts
+  // Check authentication status and load data
   useEffect(() => {
+    const checkAuth = () => {
+      const authenticated = authService.isAuthenticated();
+      setIsAuthenticated(authenticated);
+      if (authenticated) {
+        const userData = authService.getCurrentUserFromStorage();
+        setUser(userData);
+      } else {
+        setUser(null);
+      }
+    };
+
     const loadWishlistCount = async () => {
       try {
         const response = await wishlistService.getWishlist();
@@ -71,17 +91,41 @@ const Navbar: React.FC = () => {
       }
     };
 
+    checkAuth();
     loadWishlistCount();
     loadCartCount();
+
+    // Listen for auth changes (cross-tab + same-tab)
+    const handleStorageChange = () => checkAuth();
+    const handleAuthEvent = () => checkAuth();
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('auth:changed', handleAuthEvent);
 
     // Listen for wishlist/cart changes to refresh counts
     const handleWishlistChanged = () => loadWishlistCount();
     const handleCartChanged = () => loadCartCount();
     window.addEventListener('wishlist:changed', handleWishlistChanged);
     window.addEventListener('cart:changed', handleCartChanged);
+
+    // Listen for global requests to open auth modals
+    const openLoginHandler = () => {
+      setShowRegisterModal(false);
+      setShowLoginModal(true);
+    };
+    const openRegisterHandler = () => {
+      setShowLoginModal(false);
+      setShowRegisterModal(true);
+    };
+    window.addEventListener('auth:openLogin', openLoginHandler);
+    window.addEventListener('auth:openRegister', openRegisterHandler);
+
     return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth:changed', handleAuthEvent);
       window.removeEventListener('wishlist:changed', handleWishlistChanged);
       window.removeEventListener('cart:changed', handleCartChanged);
+      window.removeEventListener('auth:openLogin', openLoginHandler);
+      window.removeEventListener('auth:openRegister', openRegisterHandler);
     };
   }, []);
 
@@ -257,65 +301,178 @@ const Navbar: React.FC = () => {
           </button>
 
           {/* Account Icon / Logout - Hidden on mobile */}
-          {/* Auth removed - no account icon needed */}
+          {isAuthenticated ? (
+            <div className="hidden lg:flex items-center gap-2">
+              <Link 
+                to="/account"
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200" 
+                aria-label="Account"
+                title={user?.name || 'My Account'}
+              >
+                <svg 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  className="text-gray-700 hover:text-gray-900"
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </Link>
+              <button
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+                onClick={() => setShowLogoutConfirmation(true)}
+                aria-label="Logout"
+                title="Logout"
+              >
+                <svg 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  className="text-gray-700 hover:text-gray-900"
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <button 
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 hidden lg:block" 
+              aria-label="Account"
+              onClick={() => setShowLoginModal(true)}
+            >
+              <svg 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className="text-gray-700 hover:text-gray-900"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </button>
+          )}
 
           {/* Removed Compare icon button as it had no purpose */}
 
           {/* Heart Icon - Hidden on mobile */}
-          <Link 
-            to="/wishlist"
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 relative hidden lg:block" 
-            aria-label="Wishlist"
-          >
-            <svg 
-              width="20" 
-              height="20" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              className="text-gray-700 hover:text-gray-900"
+          {isAuthenticated ? (
+            <Link 
+              to="/wishlist"
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 relative hidden lg:block" 
+              aria-label="Wishlist"
             >
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-            </svg>
-            {/* Wishlist count badge */}
-            {wishlistCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
-                {wishlistCount}
-              </span>
-            )}
-          </Link>
+              <svg 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className="text-gray-700 hover:text-gray-900"
+              >
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              {/* Wishlist count badge */}
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+          ) : (
+            <button 
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 relative hidden lg:block" 
+              aria-label="Wishlist"
+              onClick={() => setShowLoginModal(true)}
+            >
+              <svg 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className="text-gray-700 hover:text-gray-900"
+              >
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </button>
+          )}
 
           {/* Bag Icon */}
-          <Link 
-            to="/cart"
-            className="p-1 sm:p-1.5 hover:bg-gray-100 rounded-full transition-colors duration-200 relative" 
-            aria-label="Shopping Cart"
-          >
-            <svg 
-              width="16" 
-              height="16" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              className="text-gray-700 hover:text-gray-900 sm:w-[18px] sm:h-[18px]"
+          {isAuthenticated ? (
+            <Link 
+              to="/cart"
+              className="p-1 sm:p-1.5 hover:bg-gray-100 rounded-full transition-colors duration-200 relative" 
+              aria-label="Shopping Cart"
             >
-              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <path d="M16 10a4 4 0 0 1-8 0"/>
-            </svg>
-            {/* Cart count badge */}
-            {cartCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-blue-500 text-white text-xs rounded-full h-3.5 w-3.5 sm:h-4 sm:w-4 flex items-center justify-center font-bold text-[9px] sm:text-[10px]">
-                {cartCount}
-              </span>
-            )}
-          </Link>
+              <svg 
+                width="16" 
+                height="16" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className="text-gray-700 hover:text-gray-900 sm:w-[18px] sm:h-[18px]"
+              >
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+              {/* Cart count badge */}
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-blue-500 text-white text-xs rounded-full h-3.5 w-3.5 sm:h-4 sm:w-4 flex items-center justify-center font-bold text-[9px] sm:text-[10px]">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+          ) : (
+            <button 
+              className="p-1 sm:p-1.5 hover:bg-gray-100 rounded-full transition-colors duration-200 relative" 
+              aria-label="Shopping Cart"
+              onClick={() => setShowLoginModal(true)}
+            >
+              <svg 
+                width="16" 
+                height="16" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className="text-gray-700 hover:text-gray-900 sm:w-[18px] sm:h-[18px]"
+              >
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+            </button>
+          )}
         </div>
       </nav>
 
@@ -424,12 +581,85 @@ const Navbar: React.FC = () => {
 
         {/* Sidebar Footer */}
         <div className="border-t border-gray-200 px-4 py-2">
-          {/* Language and Currency removed as requested */}
+          {/* Login/Account Button */}
+          {isAuthenticated ? (
+            <div className="flex flex-col gap-2">
+              <Link 
+                to="/account"
+                className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                onClick={() => setIsSidebarOpen(false)}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span className="font-medium">My Account</span>
+              </Link>
+              <button 
+                className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                onClick={() => { setIsSidebarOpen(false); setShowLogoutConfirmation(true); }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <span className="font-medium">Logout</span>
+              </button>
+            </div>
+          ) : (
+            <button 
+              className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              onClick={() => {
+                setShowLoginModal(true);
+                setIsSidebarOpen(false);
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <span className="font-medium">Login</span>
+            </button>
+          )}
         </div>
       </div>
 
       {/* Search Sidebar */}
       <SearchSidebar isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSuccess={() => setShowLoginModal(false)}
+        onSwitchToRegister={() => {
+          setShowLoginModal(false);
+          setShowRegisterModal(true);
+        }}
+      />
+
+      {/* Register Modal */}
+      <RegisterModal
+        isOpen={showRegisterModal}
+        onClose={() => setShowRegisterModal(false)}
+        onSuccess={() => setShowRegisterModal(false)}
+        onSwitchToLogin={() => {
+          setShowRegisterModal(false);
+          setShowLoginModal(true);
+        }}
+      />
+
+      {/* Logout Confirmation Modal */}
+      <LogoutConfirmation
+        isOpen={showLogoutConfirmation}
+        onClose={() => setShowLogoutConfirmation(false)}
+        onConfirm={() => {
+          setShowLogoutConfirmation(false);
+          authService.logout();
+          window.location.href = '/';
+        }}
+      />
     </>
   );
 };

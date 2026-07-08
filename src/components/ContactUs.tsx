@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getSiteConfig } from '../services/dataService';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 interface FormData {
   name: string;
   email: string;
@@ -57,7 +59,7 @@ const ContactUs: React.FC = () => {
     setSubmitMessage('');
 
     try {
-      const response = await fetch('/api/contact', {
+      const response = await fetch(`${API_BASE_URL}/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

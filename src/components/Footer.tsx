@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useSiteConfig } from '../hooks/useSiteConfig';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 const Footer = () => {
   const [email, setEmail] = useState('');
   const [footerConfig, setFooterConfig] = useState(null);
@@ -16,7 +18,7 @@ const Footer = () => {
   useEffect(() => {
     const fetchFooterData = async () => {
       try {
-        const response = await fetch('/api/siteconfig/all');
+        const response = await fetch(`${API_BASE_URL}/siteconfig/all`);
 
         if (response.ok) {
           const data = await response.json();
