@@ -453,7 +453,12 @@ const CheckoutPage: React.FC = () => {
                       value={billingDetails.firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
                       placeholder="Themesflat"
-                      className="w-full h-11 px-3 lg:px-4 text-sm lg:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent placeholder-gray-400"
+                      disabled={!!selectedAddressId}
+                      className={`w-full h-11 px-3 lg:px-4 text-sm lg:text-base border rounded-lg focus:outline-none placeholder-gray-400 transition-colors ${
+                        selectedAddressId 
+                          ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed' 
+                          : 'bg-white border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent'
+                      }`}
                     />
                   </div>
                   <div>
@@ -464,7 +469,12 @@ const CheckoutPage: React.FC = () => {
                       type="text"
                       value={billingDetails.lastName}
                       onChange={(e) => handleInputChange('lastName', e.target.value)}
-                      className="w-full h-11 px-3 lg:px-4 text-sm lg:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent placeholder-gray-400"
+                      disabled={!!selectedAddressId}
+                      className={`w-full h-11 px-3 lg:px-4 text-sm lg:text-base border rounded-lg focus:outline-none placeholder-gray-400 transition-colors ${
+                        selectedAddressId 
+                          ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed' 
+                          : 'bg-white border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent'
+                      }`}
                     />
                   </div>
                 </div>
@@ -479,7 +489,12 @@ const CheckoutPage: React.FC = () => {
                       type="tel"
                       value={billingDetails.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
-                      className="w-full h-11 px-3 lg:px-4 text-sm lg:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent placeholder-gray-400"
+                      disabled={!!selectedAddressId}
+                      className={`w-full h-11 px-3 lg:px-4 text-sm lg:text-base border rounded-lg focus:outline-none placeholder-gray-400 transition-colors ${
+                        selectedAddressId 
+                          ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed' 
+                          : 'bg-white border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent'
+                      }`}
                     />
                   </div>
                   <div>
@@ -490,7 +505,12 @@ const CheckoutPage: React.FC = () => {
                       type="email"
                       value={billingDetails.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="w-full h-11 px-3 lg:px-4 text-sm lg:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent placeholder-gray-400"
+                      disabled={!!selectedAddressId}
+                      className={`w-full h-11 px-3 lg:px-4 text-sm lg:text-base border rounded-lg focus:outline-none placeholder-gray-400 transition-colors ${
+                        selectedAddressId 
+                          ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed' 
+                          : 'bg-white border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent'
+                      }`}
                     />
                   </div>
                 </div>
@@ -504,7 +524,12 @@ const CheckoutPage: React.FC = () => {
                     type="text"
                     value={billingDetails.address}
                     onChange={(e) => handleInputChange('address', e.target.value)}
-                    className="w-full h-11 px-3 lg:px-4 text-sm lg:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent placeholder-gray-400"
+                    disabled={!!selectedAddressId}
+                    className={`w-full h-11 px-3 lg:px-4 text-sm lg:text-base border rounded-lg focus:outline-none placeholder-gray-400 transition-colors ${
+                      selectedAddressId 
+                        ? 'bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed' 
+                        : 'bg-white border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent'
+                    }`}
                   />
                 </div>
 
