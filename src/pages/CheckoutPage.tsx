@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import cartService from '../services/cartService';
+import authService from '../services/authService';
+import addressService, { Address } from '../services/addressService';
+import orderService from '../services/orderService';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -57,6 +60,8 @@ const CheckoutPage: React.FC = () => {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [orderSuccessData, setOrderSuccessData] = useState<OrderSuccessData | null>(null);
   const [upiSettings, setUpiSettings] = useState<{ upiId: string; merchantName: string } | null>(null);
+  const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>('');
   
   const [billingDetails, setBillingDetails] = useState<BillingDetails>({
     firstName: '',
@@ -103,6 +108,58 @@ const CheckoutPage: React.FC = () => {
           setUpiSettings(paymentSettingsResponse.data.upiSettings);
         }
       }
+
+      // Check if user is logged in
+      if (authService.isAuthenticated()) {
+        const user = authService.getCurrentUserFromStorage();
+        const addresses = await addressService.getAddresses();
+        setSavedAddresses(addresses);
+
+        // Prepopulate email and name
+        let firstName = '';
+        let lastName = '';
+        if (user && user.name) {
+          const parts = user.name.split(' ');
+          firstName = parts[0] || '';
+          lastName = parts.slice(1).join(' ') || '';
+        }
+
+        const email = user?.email || '';
+
+        // If there's a default address, prepopulate everything!
+        const defaultAddr = addresses.find(addr => addr.isDefault) || addresses[0];
+        if (defaultAddr) {
+          setSelectedAddressId(defaultAddr._id || '');
+          
+          let addrFirstName = '';
+          let addrLastName = '';
+          if (defaultAddr.fullName) {
+            const parts = defaultAddr.fullName.split(' ');
+            addrFirstName = parts[0] || '';
+            addrLastName = parts.slice(1).join(' ') || '';
+          }
+
+          setBillingDetails({
+            firstName: addrFirstName || firstName,
+            lastName: addrLastName || lastName,
+            country: defaultAddr.country || 'India',
+            city: defaultAddr.city || '',
+            state: defaultAddr.state || '',
+            postalCode: defaultAddr.postalCode || '',
+            address: defaultAddr.addressLine1 + (defaultAddr.addressLine2 ? `, ${defaultAddr.addressLine2}` : ''),
+            phone: defaultAddr.phone || '',
+            email: email,
+            orderNotes: ''
+          });
+        } else {
+          setBillingDetails(prev => ({
+            ...prev,
+            firstName,
+            lastName,
+            email
+          }));
+        }
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to load checkout data');
     } finally {
@@ -112,6 +169,48 @@ const CheckoutPage: React.FC = () => {
 
   const handleInputChange = (field: keyof BillingDetails, value: string) => {
     setBillingDetails(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleAddressSelect = (addressId: string) => {
+    setSelectedAddressId(addressId);
+    if (!addressId) {
+      // Clear fields to let user enter manually
+      setBillingDetails(prev => ({
+        ...prev,
+        firstName: '',
+        lastName: '',
+        country: '',
+        city: '',
+        state: '',
+        postalCode: '',
+        address: '',
+        phone: ''
+      }));
+      return;
+    }
+
+    const addr = savedAddresses.find(a => a._id === addressId);
+    if (addr) {
+      let addrFirstName = '';
+      let addrLastName = '';
+      if (addr.fullName) {
+        const parts = addr.fullName.split(' ');
+        addrFirstName = parts[0] || '';
+        addrLastName = parts.slice(1).join(' ') || '';
+      }
+
+      setBillingDetails(prev => ({
+        ...prev,
+        firstName: addrFirstName,
+        lastName: addrLastName,
+        country: addr.country || 'India',
+        city: addr.city || '',
+        state: addr.state || '',
+        postalCode: addr.postalCode || '',
+        address: addr.addressLine1 + (addr.addressLine2 ? `, ${addr.addressLine2}` : ''),
+        phone: addr.phone || ''
+      }));
+    }
   };
 
 
@@ -182,39 +281,50 @@ const CheckoutPage: React.FC = () => {
         phone: billingDetails.phone,
         country: fallbackCountry
       };
-      
-      // Get cart items for guest order
-      const rawItems = cartService.getRawItems();
-      const items = rawItems.map((item: any) => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        selectedColor: item.selectedColor || '',
-        selectedSize: item.selectedSize || ''
-      }));
 
-      // Create guest order
-      const response = await fetch(`${API_BASE_URL}/orders/guest`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          items,
-          shippingAddress,
-          customerEmail: billingDetails.email,
-          customerName: `${billingDetails.firstName} ${billingDetails.lastName}`.trim(),
-          customerPhone: billingDetails.phone,
-          orderNotes: billingDetails.orderNotes,
-          paymentMethod
-        })
-      });
-      
-      const data = await response.json();
-      if (!data.success || !data.data?._id) {
-        throw new Error(data.message || 'Failed to place order');
+      let createdOrder;
+
+      if (authService.isAuthenticated()) {
+        const response = await orderService.createOrderFromCart({
+          shippingAddress
+        });
+        if (!response.success || !response.data?._id) {
+          throw new Error(response.message || 'Failed to place order');
+        }
+        createdOrder = response.data;
+      } else {
+        // Get cart items for guest order
+        const rawItems = cartService.getRawItems();
+        const items = rawItems.map((item: any) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          selectedColor: item.selectedColor || '',
+          selectedSize: item.selectedSize || ''
+        }));
+
+        // Create guest order
+        const response = await fetch(`${API_BASE_URL}/orders/guest`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            items,
+            shippingAddress,
+            customerEmail: billingDetails.email,
+            customerName: `${billingDetails.firstName} ${billingDetails.lastName}`.trim(),
+            customerPhone: billingDetails.phone,
+            orderNotes: billingDetails.orderNotes,
+            paymentMethod
+          })
+        });
+        
+        const data = await response.json();
+        if (!data.success || !data.data?._id) {
+          throw new Error(data.message || 'Failed to place order');
+        }
+        createdOrder = data.data;
       }
-
-      const createdOrder = data.data;
 
       // COD flow: confirm order without online payment
       if (paymentMethod === 'cod') {
@@ -308,6 +418,27 @@ const CheckoutPage: React.FC = () => {
               <h2 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-black mb-3 sm:mb-4 lg:mb-6">
                 Billing details
               </h2>
+
+              {/* Stored Addresses Selector */}
+              {savedAddresses.length > 0 && (
+                <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <label className="block text-sm font-semibold text-gray-800 mb-2">
+                    Use a Saved Address
+                  </label>
+                  <select
+                    value={selectedAddressId}
+                    onChange={(e) => handleAddressSelect(e.target.value)}
+                    className="w-full h-11 px-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-black text-sm"
+                  >
+                    <option value="">-- Enter a new address --</option>
+                    {savedAddresses.map((addr) => (
+                      <option key={addr._id} value={addr._id}>
+                        {addr.fullName} - {addr.addressLine1}, {addr.city} ({addr.isDefault ? 'Default' : 'Saved'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               
               <div className="space-y-4">
                 {/* Name Row */}

@@ -41,9 +41,9 @@ class OrderService {
     }
   }
   // Create order from current cart
-  async createOrderFromCart() {
+  async createOrderFromCart(orderData) {
     try {
-      const response = await api.post('/orders');
+      const response = await api.post('/orders', orderData);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Failed to create order from cart' };
