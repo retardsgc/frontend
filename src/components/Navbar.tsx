@@ -253,7 +253,7 @@ const Navbar: React.FC = () => {
         </button>
 
         {/* Logo - Centered on mobile, left on desktop */}
-        <div className="flex items-center lg:justify-start justify-center flex-1 lg:flex-none">
+        <div className="flex items-center lg:flex-1 lg:justify-start justify-center">
           <Link to="/">
             <img
               src={logoUrl}
@@ -277,7 +277,7 @@ const Navbar: React.FC = () => {
         </div>
       
         {/* Right Icons */}
-        <div className="flex items-center gap-x-1 sm:gap-x-2 md:gap-x-3">
+        <div className="flex items-center gap-x-1 sm:gap-x-2 md:gap-x-3 lg:flex-1 lg:justify-end">
           {/* Search Icon */}
           <button 
             className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors duration-200" 
