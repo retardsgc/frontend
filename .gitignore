@@ -47,3 +47,4 @@ tests/.auth/
 
 # Misc/Deploy
 .vercel/
+.env.production
