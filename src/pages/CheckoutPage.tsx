@@ -282,26 +282,27 @@ const CheckoutPage: React.FC = () => {
         country: fallbackCountry
       };
 
+      // Get cart items for order
+      const rawItems = cartService.getRawItems();
+      const items = rawItems.map((item: any) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        selectedColor: item.selectedColor || '',
+        selectedSize: item.selectedSize || ''
+      }));
+
       let createdOrder;
 
       if (authService.isAuthenticated()) {
         const response = await orderService.createOrderFromCart({
-          shippingAddress
+          shippingAddress,
+          items
         });
         if (!response.success || !response.data?._id) {
           throw new Error(response.message || 'Failed to place order');
         }
         createdOrder = response.data;
       } else {
-        // Get cart items for guest order
-        const rawItems = cartService.getRawItems();
-        const items = rawItems.map((item: any) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          selectedColor: item.selectedColor || '',
-          selectedSize: item.selectedSize || ''
-        }));
-
         // Create guest order
         const response = await fetch(`${API_BASE_URL}/orders/guest`, {
           method: 'POST',
