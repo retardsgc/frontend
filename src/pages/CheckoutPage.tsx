@@ -422,14 +422,14 @@ const CheckoutPage: React.FC = () => {
 
               {/* Stored Addresses Selector */}
               {savedAddresses.length > 0 && (
-                <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <label className="block text-sm font-semibold text-gray-800 mb-2">
+                <div className="mb-6">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
                     Use a Saved Address
                   </label>
                   <select
                     value={selectedAddressId}
                     onChange={(e) => handleAddressSelect(e.target.value)}
-                    className="w-full h-11 px-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-black text-sm"
+                    className="w-full h-11 px-3 lg:px-4 text-sm lg:text-base border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent placeholder-gray-400 cursor-pointer"
                   >
                     <option value="">-- Enter a new address --</option>
                     {savedAddresses.map((addr) => (
