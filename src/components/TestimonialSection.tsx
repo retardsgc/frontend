@@ -101,7 +101,7 @@ const HappyClientsModel: React.FC<{ testimonialSection: TestimonialSectionType }
                   className="flex-shrink-0 px-2.5"
                 >
                   {/* ─── Card ─── */}
-                  <div className="bg-white rounded-xl border border-gray-200 flex flex-col h-full">
+                  <div className="bg-white rounded-xl border border-gray-200 flex flex-col h-full transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1.5 hover:border-gray-300">
 
                     {/* Card body: stars → heading → review text */}
                     <div className="px-6 pt-6 pb-5 flex-1 flex flex-col">
