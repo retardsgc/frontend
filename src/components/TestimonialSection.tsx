@@ -18,7 +18,8 @@ interface Testimonial {
 const TestimonialSection: React.FC = () => {
   const [config, setConfig] = useState<any | null>(null);
   const [currentTestimonial, setCurrentTestimonial] = useState<number>(0);
-  const [startIndex, setStartIndex] = useState<number>(0);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
   useEffect(() => {
     // Load homepage configuration using the siteConfigService
@@ -77,6 +78,12 @@ const TestimonialSection: React.FC = () => {
     loadHomepageConfig();
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   if (!config) return <div>Loading...</div>;
 
   // Get testimonialSection from config with fallback
@@ -130,9 +137,19 @@ const TestimonialSection: React.FC = () => {
   const testimonials = testimonialSection.testimonials || [];
   const layout = testimonialSection.layout || 'model1';
 
+  // Calculate dynamic count for visible items based on window width
+  const getVisibleCount = () => {
+    if (windowWidth < 768) return 1;
+    if (windowWidth < 1024) return 2;
+    return 3;
+  };
+
+  const visibleCount = getVisibleCount();
+  const maxIndex = Math.max(0, testimonials.length - visibleCount);
+
   const nextTestimonial = (): void => {
     if (layout === 'model2') {
-      setStartIndex((prev) => (prev + 1) % testimonials.length);
+      setCurrentIndex((prev) => (prev < maxIndex ? prev + 1 : 0));
     } else {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
     }
@@ -140,7 +157,7 @@ const TestimonialSection: React.FC = () => {
 
   const prevTestimonial = (): void => {
     if (layout === 'model2') {
-      setStartIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+      setCurrentIndex((prev) => (prev > 0 ? prev - 1 : maxIndex));
     } else {
       setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
     }
@@ -148,152 +165,144 @@ const TestimonialSection: React.FC = () => {
 
   // Render Model 2 (Happy Clients Layout)
   if (layout === 'model2') {
-    const getVisibleIndices = () => {
-      if (testimonials.length === 0) return [];
-      if (testimonials.length === 1) return [0];
-      if (testimonials.length === 2) return [0, 1];
-      
-      return [
-        startIndex % testimonials.length,
-        (startIndex + 1) % testimonials.length,
-        (startIndex + 2) % testimonials.length
-      ];
-    };
-
-    const visibleIndices = getVisibleIndices();
-
     return (
-      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50 overflow-hidden">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4" style={{ fontFamily: "'Albert Sans', sans-serif" }}>
+          <div className="text-center mb-10 sm:mb-12">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 mb-3" style={{ fontFamily: "'Outfit', 'Albert Sans', sans-serif", letterSpacing: '-0.02em' }}>
               {testimonialSection.title || "Happy Clients"}
             </h2>
             {testimonialSection.subtitle && (
-              <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-sm sm:text-base text-gray-500 max-w-2xl mx-auto leading-relaxed">
                 {testimonialSection.subtitle}
               </p>
             )}
           </div>
 
           {/* Cards & Carousel Wrapper */}
-          <div className="relative flex items-center justify-between w-full max-w-[1600px] mx-auto px-2 sm:px-12">
+          <div className="relative w-full max-w-[1500px] mx-auto px-2 sm:px-14 flex items-center justify-center">
             {/* Left Button */}
-            {testimonials.length > 1 && (
+            {maxIndex > 0 && (
               <button
                 onClick={prevTestimonial}
-                className="absolute left-0 sm:left-2 z-10 p-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all duration-200 text-gray-600 hover:text-gray-900 focus:outline-none"
+                className="absolute left-0 sm:left-4 z-10 p-2.5 rounded-full bg-white shadow-md border border-gray-100 hover:bg-gray-50 hover:shadow-lg transition-all duration-200 text-gray-600 hover:text-gray-900 focus:outline-none flex items-center justify-center"
                 aria-label={testimonialSection.navigationLabels?.previous || "Previous"}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
             )}
 
-            {/* Grid of Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full px-6 sm:px-8">
-              {visibleIndices.map((origIndex, idx) => {
-                const testimonial = testimonials[origIndex];
-                if (!testimonial) return null;
-                
-                // Hide second card on mobile, third card on mobile and tablet
-                const visibilityClass = idx === 0 
-                  ? "block w-full" 
-                  : idx === 1 
-                    ? "hidden md:block w-full" 
-                    : "hidden lg:block w-full";
-
-                return (
-                  <div
-                    key={`${origIndex}-${idx}`}
-                    className={`${visibilityClass} bg-white rounded-xl p-6 sm:p-8 border border-gray-100 flex flex-col justify-between h-full shadow-sm hover:shadow-md transition-shadow duration-300`}
+            {/* Slider Container */}
+            <div className="w-full overflow-hidden">
+              <div 
+                className="flex transition-transform duration-500 ease-out" 
+                style={{ 
+                  transform: `translate3d(-${currentIndex * (100 / visibleCount)}%, 0, 0)`,
+                  transition: 'transform 600ms cubic-bezier(0.25, 1, 0.5, 1)'
+                }}
+              >
+                {testimonials.map((testimonial, idx) => (
+                  <div 
+                    key={idx} 
+                    className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-3"
                   >
-                    {/* Top Content */}
-                    <div>
-                      {/* Green Star Rating */}
-                      <div className="flex items-center gap-1 mb-4">
-                        {[...Array(Number(testimonial.rating || 5))].map((_, i) => (
-                          <svg
-                            key={i}
-                            className="w-4 h-4 text-[#54d175]"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                          </svg>
-                        ))}
+                    <div className="bg-white rounded-xl p-6 sm:p-8 border border-[#e8e8e8] flex flex-col justify-between h-full shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300">
+                      {/* Top Content */}
+                      <div>
+                        {/* Green Star Rating */}
+                        <div className="flex items-center gap-0.5 mb-3.5">
+                          {[...Array(Number(testimonial.rating || 5))].map((_, i) => (
+                            <svg
+                              key={i}
+                              className="w-4 h-4 text-[#54d175]"
+                              fill="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                          ))}
+                        </div>
+
+                        {/* Heading */}
+                        {testimonial.heading && (
+                          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2.5" style={{ fontFamily: "'Outfit', 'Albert Sans', sans-serif" }}>
+                            {testimonial.heading}
+                          </h3>
+                        )}
+
+                        {/* Review text */}
+                        <blockquote className="text-gray-600 text-sm sm:text-[14.5px] mb-6 leading-relaxed font-normal">
+                          " {testimonial.text} "
+                        </blockquote>
                       </div>
 
-                      {/* Heading */}
-                      {testimonial.heading && (
-                        <h3 className="text-lg font-bold text-gray-900 mb-3" style={{ fontFamily: "'Albert Sans', sans-serif" }}>
-                          {testimonial.heading}
-                        </h3>
-                      )}
-
-                      {/* Review text */}
-                      <blockquote className="text-gray-600 text-sm sm:text-base mb-6 leading-relaxed">
-                        " {testimonial.text} "
-                      </blockquote>
-                    </div>
-
-                    {/* Bottom Author & Product */}
-                    <div>
-                      {/* Author details */}
-                      <div className="mb-5">
-                        <div className="font-bold text-gray-900 text-sm" style={{ fontFamily: "'Albert Sans', sans-serif" }}>
-                          {testimonial.name}
+                      {/* Bottom Author & Product */}
+                      <div>
+                        {/* Author details */}
+                        <div className="mb-4">
+                          <div className="font-semibold text-gray-900 text-sm" style={{ fontFamily: "'Outfit', 'Albert Sans', sans-serif" }}>
+                            {testimonial.name}
+                          </div>
+                          <div className="text-xs text-gray-400 mt-0.5">
+                            {testimonial.role}
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500 mt-0.5">
-                          {testimonial.role}
-                        </div>
+
+                        {/* Product Section (if defined) */}
+                        {testimonial.productName && (
+                          <>
+                            <div className="border-t border-[#f0f0f0] my-4"></div>
+                            <a
+                              href={testimonial.productLink || "#"}
+                              className="flex items-center justify-between group hover:opacity-95 transition-all duration-200"
+                            >
+                              <div className="flex items-center min-w-0">
+                                {testimonial.productImage && (
+                                  <img
+                                    src={getImageUrl(testimonial.productImage)}
+                                    alt={testimonial.productName}
+                                    className="w-12 h-12 object-contain mr-3.5 rounded bg-gray-50 p-1 border border-gray-100 flex-shrink-0"
+                                  />
+                                )}
+                                <div className="min-w-0">
+                                  <h4 className="text-xs sm:text-sm font-medium text-gray-700 line-clamp-1 group-hover:underline">
+                                    {testimonial.productName}
+                                  </h4>
+                                  {testimonial.productPrice && (
+                                    <p className="text-xs sm:text-sm font-semibold text-gray-900 mt-0.5">
+                                      {testimonial.productPrice}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              {/* Top-Right Arrow Action Circle Button */}
+                              <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 group-hover:text-gray-900 group-hover:border-gray-900 transition-all duration-200 flex-shrink-0 ml-2">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M17 7H7M17 7V17" />
+                                </svg>
+                              </div>
+                            </a>
+                          </>
+                        )}
                       </div>
-
-                      {/* Product Section (if defined) */}
-                      {testimonial.productName && (
-                        <>
-                          <div className="border-t border-gray-100 my-5"></div>
-                          <a
-                            href={testimonial.productLink || "#"}
-                            className="flex items-center hover:opacity-95 transition-opacity duration-200"
-                          >
-                            {testimonial.productImage && (
-                              <img
-                                src={getImageUrl(testimonial.productImage)}
-                                alt={testimonial.productName}
-                                className="w-14 h-14 object-contain mr-4 rounded bg-gray-50 p-1 flex-shrink-0"
-                              />
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2 hover:underline">
-                                {testimonial.productName}
-                              </h4>
-                              {testimonial.productPrice && (
-                                <p className="text-xs sm:text-sm font-bold text-gray-900 mt-1">
-                                  {testimonial.productPrice}
-                                </p>
-                              )}
-                            </div>
-                          </a>
-                        </>
-                      )}
                     </div>
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
 
             {/* Right Button */}
-            {testimonials.length > 1 && (
+            {maxIndex > 0 && (
               <button
                 onClick={nextTestimonial}
-                className="absolute right-0 sm:right-2 z-10 p-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all duration-200 text-gray-600 hover:text-gray-900 focus:outline-none"
+                className="absolute right-0 sm:right-4 z-10 p-2.5 rounded-full bg-white shadow-md border border-gray-100 hover:bg-gray-50 hover:shadow-lg transition-all duration-200 text-gray-600 hover:text-gray-900 focus:outline-none flex items-center justify-center"
                 aria-label={testimonialSection.navigationLabels?.next || "Next"}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
             )}
