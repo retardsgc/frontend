@@ -76,6 +76,7 @@ class SiteConfigService {
 
     // Testimonials Section defaults
     homepage.testimonialSection = homepage.testimonialSection || {};
+    homepage.testimonialSection.enabled = homepage.testimonialSection.enabled !== false; // default true
     homepage.testimonialSection.title = homepage.testimonialSection.title || 'Customer Testimonials';
     homepage.testimonialSection.navigationLabels = homepage.testimonialSection.navigationLabels || {};
     homepage.testimonialSection.navigationLabels.previous = homepage.testimonialSection.navigationLabels.previous || 'Previous';

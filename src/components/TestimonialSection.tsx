@@ -17,7 +17,7 @@ const TestimonialSection: React.FC = () => {
     // Load homepage configuration using the siteConfigService
     const loadHomepageConfig = async () => {
       try {
-        const homepageConfig = await siteConfigService.getConfig('homepage');
+        const homepageConfig = await siteConfigService.getHomepage();
         setConfig(homepageConfig);
       } catch (error) {
         // Set fallback config on error
