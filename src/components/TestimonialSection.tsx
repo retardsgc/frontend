@@ -86,7 +86,7 @@ const HappyClientsModel: React.FC<{ testimonialSection: TestimonialSectionType }
           </button>
 
           {/* Cards overflow-hidden ONLY on the inner slider track */}
-          <div className="overflow-hidden" ref={containerRef}>
+          <div className="overflow-hidden py-4 -my-4" ref={containerRef}>
             <div
               className="flex"
               style={{
@@ -101,7 +101,7 @@ const HappyClientsModel: React.FC<{ testimonialSection: TestimonialSectionType }
                   className="flex-shrink-0 px-2.5"
                 >
                   {/* ─── Card ─── */}
-                  <div className="group/card bg-white rounded-xl border border-gray-100 flex flex-col h-full shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all duration-500 ease-out hover:shadow-[0_12px_32px_rgba(0,0,0,0.06)] hover:border-gray-300/80">
+                  <div className="group/card bg-white rounded-xl border border-gray-100 flex flex-col h-full shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] hover:-translate-y-2 hover:border-gray-300/80">
 
                     {/* Card body: stars → heading → review text */}
                     <div className="px-6 pt-6 pb-5 flex-1 flex flex-col">
