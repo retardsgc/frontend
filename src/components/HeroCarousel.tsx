@@ -14,7 +14,7 @@ const HeroCarousel = () => {
   const contentRef = useRef<any[]>([]);
   const imageRef = useRef<any[]>([]);
   const buttonRef = useRef(null);
-  
+
   const slideDirection = useRef<'next' | 'prev'>('next');
   const prevActiveIndexRef = useRef<number | null>(null);
 
@@ -29,7 +29,7 @@ const HeroCarousel = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  
+
   // Fetch hero slides from backend on mount
   useEffect(() => {
     siteConfigService.getHero()
@@ -38,13 +38,13 @@ const HeroCarousel = () => {
           setSlides(config.slides);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
     // Initialize GSAP timeline
     tl.current = gsap.timeline();
-    
+
     // Animate active slide content
     animateActiveSlide();
   }, [activeIndex, windowWidth, slides.length]); // Re-run when slides length updates
@@ -53,10 +53,10 @@ const HeroCarousel = () => {
     if (tl.current) {
       tl.current.clear();
     }
-    
+
     const isMobile = windowWidth <= 768;
     const isTablet = windowWidth > 768 && windowWidth <= 1024;
-    
+
     // Calculate offsets based on screen size
     let xOffset = 1265;
     if (isMobile) {
@@ -64,27 +64,27 @@ const HeroCarousel = () => {
     } else if (isTablet) {
       xOffset = 590;
     }
-    
+
     const total = slides.length;
     if (total === 0) return;
 
     const prevActiveIndex = prevActiveIndexRef.current;
-    
+
     slides.forEach((_, index) => {
       const slideElement = slidesRef.current[index];
       if (!slideElement) return;
-      
+
       // Calculate circular distance between this slide index and the active index
       let diff = index - activeIndex;
       if (diff > total / 2) diff -= total;
       if (diff < -total / 2) diff += total;
-      
+
       let x = 0;
       let scale = 0.8;
       let opacity = 0;
       let zIndex = 0;
       let pointerEvents = 'none';
-      
+
       if (diff === 0) {
         x = 0;
         scale = 1;
@@ -183,42 +183,45 @@ const HeroCarousel = () => {
           ease: "power2.inOut" // Premium smooth transition curve
         });
       }
-      
+
       // Animate content elements
       const content = contentRef.current[index];
       const image = imageRef.current[index];
-      
+
       if (index === activeIndex) {
         if (content) {
           const heading = content.querySelector('h2');
           const subheading = content.querySelector('p');
           const button = content.querySelector('a');
-          
-          // Reset and animate heading
-          if (heading) {
-            gsap.fromTo(heading, 
-              { y: 30, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.5, ease: "power3.out", delay: 0.1 }
-            );
-          }
-          
-          // Reset and animate subheading
-          if (subheading) {
-            gsap.fromTo(subheading,
-              { y: 20, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.5, ease: "power3.out", delay: 0.2 }
-            );
-          }
-          
-          // Reset and animate button
-          if (button) {
-            gsap.fromTo(button,
-              { y: 15, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.5, ease: "power3.out", delay: 0.3 }
-            );
+
+          const isInitialLoad = prevActiveIndex === null;
+
+          if (isInitialLoad) {
+            // On initial page load: pop up text snappily
+            if (heading) {
+              gsap.fromTo(heading, 
+                { y: 30, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.5, ease: "power3.out", delay: 0.1 }
+              );
+            }
+            if (subheading) {
+              gsap.fromTo(subheading,
+                { y: 20, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.5, ease: "power3.out", delay: 0.2 }
+              );
+            }
+            if (button) {
+              gsap.fromTo(button,
+                { y: 15, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.5, ease: "power3.out", delay: 0.3 }
+              );
+            }
+          } else {
+            // On navigation clicks: show content normally (instant display) so it slides with card
+            gsap.set([heading, subheading, button], { opacity: 1, y: 0 });
           }
         }
-        
+
         if (image) {
           const isInitialLoad = prevActiveIndexRef.current === null;
           if (isInitialLoad) {
@@ -242,7 +245,7 @@ const HeroCarousel = () => {
           const heading = content.querySelector('h2');
           const subheading = content.querySelector('p');
           const button = content.querySelector('a');
-          
+
           gsap.set([heading, subheading, button], { opacity: 0, y: 0 });
         }
         if (image) {
@@ -268,7 +271,7 @@ const HeroCarousel = () => {
   const getSlideClass = (index) => {
     const baseClass = "absolute flex flex-col items-center justify-center bg-transparent rounded-2xl left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden";
     const sizeClass = index === activeIndex ? "carousel-card-active" : "carousel-card-inactive";
-    
+
     if (index === activeIndex) {
       return `${baseClass} ${sizeClass} z-20`;
     } else {
@@ -279,7 +282,7 @@ const HeroCarousel = () => {
   const getSlideStyle = (index) => {
     const isMobile = windowWidth <= 768;
     const isTablet = windowWidth > 768 && windowWidth <= 1024;
-    
+
     // Calculate offsets based on screen size
     let xOffset = 1265;
     if (isMobile) {
@@ -355,23 +358,23 @@ const HeroCarousel = () => {
         }}
         aria-label="Previous slide"
       >
-        <svg 
-          width="16" 
-          height="16" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="2.5" 
-          strokeLinecap="round" 
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
           strokeLinejoin="round"
           className="sm:w-5 sm:h-5"
         >
-          <path d="m15 18-6-6 6-6"/>
+          <path d="m15 18-6-6 6-6" />
         </svg>
       </button>
 
       {/* Slides Container */}
-      <div 
+      <div
         className="flex items-center justify-center relative w-full overflow-hidden px-4 sm:px-8"
         style={{ height: getContainerHeight() }}
       >
@@ -382,7 +385,7 @@ const HeroCarousel = () => {
         ) : (
           slides.map((slide, index) => {
             const imageUrl = slide.image ? getImageUrl(slide.image) : null;
-            
+
             return (
               <div
                 key={`${slide.id}-${index}`}
@@ -392,15 +395,15 @@ const HeroCarousel = () => {
               >
                 {/* Stable Background Container */}
                 <div className="absolute inset-0 bg-[#f5f5f7] rounded-2xl z-0 pointer-events-none shadow-[inset_0_0_40px_rgba(0,0,0,0.15)]" />
-                
+
                 {/* Slide Image - now a separate absolute layer that slides left/right smoothly */}
                 {slide.image && (
-                  <div 
+                  <div
                     ref={el => { imageRef.current[index] = el; }}
                     className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden rounded-2xl z-0"
                   >
-                    <img 
-                      src={imageUrl} 
+                    <img
+                      src={imageUrl}
                       alt={slide.heading}
                       className="w-full h-full object-cover select-none"
                     />
@@ -408,18 +411,20 @@ const HeroCarousel = () => {
                 )}
 
                 {/* Content Section - Overlaid on background */}
-                <div 
+                <div
                   ref={el => { contentRef.current[index] = el; }}
                   className="flex flex-col items-center text-center px-4 sm:px-8 lg:px-16 py-4 sm:py-8 relative z-10 w-[70%] sm:w-full mx-auto h-full justify-start pt-16 sm:pt-16"
                 >
                   {/* Main Heading */}
-                  <h2 
-                    className={`font-normal mb-3 sm:mb-6 leading-tight ${
-                      index === activeIndex 
-                        ? 'text-[28px] sm:text-[40px] lg:text-[56px]' 
+                  <h2
+                    className={`font-normal mb-3 sm:mb-6 leading-tight ${index === activeIndex
+                        ? 'text-[28px] sm:text-[40px] lg:text-[56px]'
                         : 'text-[20px] sm:text-[30px] lg:text-[40px]'
-                    }`}
-                    style={{ color: slide.textColor || '#000000', opacity: 0 }}
+                      }`}
+                    style={{ 
+                      color: slide.textColor || '#000000', 
+                      opacity: prevActiveIndexRef.current === null ? 0 : (index === activeIndex ? 1 : 0) 
+                    }}
                   >
                     {slide.heading.split('\n').map((line, lineIndex) => (
                       <React.Fragment key={lineIndex}>
@@ -428,27 +433,29 @@ const HeroCarousel = () => {
                       </React.Fragment>
                     ))}
                   </h2>
-                  
+
                   {/* Subheading */}
-                  <p 
-                    className={`mb-3 sm:mb-6 max-w-xs sm:max-w-md ${
-                      index === activeIndex 
-                        ? 'text-[12px] sm:text-[16px] lg:text-[20px]' 
+                  <p
+                    className={`mb-3 sm:mb-6 max-w-xs sm:max-w-md ${index === activeIndex
+                        ? 'text-[12px] sm:text-[16px] lg:text-[20px]'
                         : 'text-[10px] sm:text-[14px] lg:text-[16px]'
-                    }`}
-                    style={{ color: slide.textColor || '#000000', opacity: 0 }}
+                      }`}
+                    style={{ 
+                      color: slide.textColor || '#000000', 
+                      opacity: prevActiveIndexRef.current === null ? 0 : (index === activeIndex ? 1 : 0) 
+                    }}
                   >
                     {slide.subheading}
                   </p>
-                  
+
                   {/* Button */}
                   <a
                     href={slide.buttonLink || '/products'}
-                    style={{ 
+                    style={{
                       marginTop: '30px',
                       borderColor: slide.textColor || '#000000',
                       color: slide.textColor || '#000000',
-                      opacity: 0
+                      opacity: prevActiveIndexRef.current === null ? 0 : (index === activeIndex ? 1 : 0)
                     }}
                     className="inline-flex items-center border-2 px-4 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-lg font-medium transition-all duration-300 hover:bg-black hover:!text-white group"
                   >
@@ -464,7 +471,7 @@ const HeroCarousel = () => {
                       strokeLinejoin="round"
                       className="ml-2 transition-transform group-hover:translate-x-1 sm:w-4 sm:h-4"
                     >
-                      <path d="m9 18 6-6-6-6"/>
+                      <path d="m9 18 6-6-6-6" />
                     </svg>
                   </a>
                 </div>
@@ -483,18 +490,18 @@ const HeroCarousel = () => {
         }}
         aria-label="Next slide"
       >
-        <svg 
-          width="16" 
-          height="16" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="2.5" 
-          strokeLinecap="round" 
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
           strokeLinejoin="round"
           className="sm:w-5 sm:h-5"
         >
-          <path d="m9 18 6-6-6-6"/>
+          <path d="m9 18 6-6-6-6" />
         </svg>
       </button>
     </section>
