@@ -67,11 +67,18 @@ export interface Testimonial {
   rating: number;
   text: string;
   image?: string;
+  heading?: string;
+  productImage?: string;
+  productName?: string;
+  productPrice?: string;
+  productLink?: string;
 }
 
 export interface TestimonialSection {
   enabled?: boolean;
+  layout?: 'model1' | 'model2';
   title: string;
+  subtitle?: string;
   testimonials: Testimonial[];
   navigationLabels: {
     previous: string;

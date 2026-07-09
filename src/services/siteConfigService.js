@@ -77,7 +77,9 @@ class SiteConfigService {
     // Testimonials Section defaults
     homepage.testimonialSection = homepage.testimonialSection || {};
     homepage.testimonialSection.enabled = homepage.testimonialSection.enabled !== false; // default true
+    homepage.testimonialSection.layout = homepage.testimonialSection.layout || 'model1';
     homepage.testimonialSection.title = homepage.testimonialSection.title || 'Customer Testimonials';
+    homepage.testimonialSection.subtitle = homepage.testimonialSection.subtitle || 'See what our satisfied customers have to say about our electronic accessories.';
     homepage.testimonialSection.navigationLabels = homepage.testimonialSection.navigationLabels || {};
     homepage.testimonialSection.navigationLabels.previous = homepage.testimonialSection.navigationLabels.previous || 'Previous';
     homepage.testimonialSection.navigationLabels.next = homepage.testimonialSection.navigationLabels.next || 'Next';
@@ -86,7 +88,12 @@ class SiteConfigService {
           name: t?.name || "Anonymous",
           role: t?.role || "Customer",
           text: t?.text || "",
-          rating: t?.rating || 5
+          rating: Number(t?.rating) || 5,
+          heading: t?.heading || "",
+          productImage: t?.productImage || "",
+          productName: t?.productName || "",
+          productPrice: t?.productPrice || "",
+          productLink: t?.productLink || ""
         }))
       : [
           {

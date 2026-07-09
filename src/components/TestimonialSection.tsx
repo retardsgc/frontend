@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import siteConfigService from '../services/siteConfigService';
 import type { SiteConfig, TestimonialSection as TestimonialSectionType } from '../types';
+import { getImageUrl } from '../utils/imageUrl';
 
 interface Testimonial {
   name: string;
   role: string;
   text: string;
   rating: number;
+  heading?: string;
+  productImage?: string;
+  productName?: string;
+  productPrice?: string;
+  productLink?: string;
 }
 
 const TestimonialSection: React.FC = () => {
   const [config, setConfig] = useState<any | null>(null);
   const [currentTestimonial, setCurrentTestimonial] = useState<number>(0);
+  const [startIndex, setStartIndex] = useState<number>(0);
 
   useEffect(() => {
     // Load homepage configuration using the siteConfigService
@@ -24,25 +31,42 @@ const TestimonialSection: React.FC = () => {
         setConfig({
           testimonialSection: {
             title: "Customer Testimonials",
+            subtitle: "See what our satisfied customers have to say about our electronic accessories.",
+            layout: "model1",
             navigationLabels: { previous: "Previous", next: "Next" },
             testimonials: [
               {
-                name: "John Doe",
-                role: "Customer",
-                text: "Great service and fast delivery!",
-                rating: 5
+                name: "Robert Smith",
+                role: "Customer from USA",
+                text: "I always find something stylish and affordable on this web fashion site",
+                rating: 5,
+                heading: "Best Online Fashion Site",
+                productName: "3-in-1 Wireless Charger with Official MagSafe Charging 15W",
+                productPrice: "$105.95",
+                productImage: "feature1",
+                productLink: "#"
               },
               {
-                name: "Jane Smith",
-                role: "Customer",
-                text: "Excellent quality products.",
-                rating: 5
+                name: "Allen Lyn",
+                role: "Customer from France",
+                text: "I love the variety of styles and the high-quality clothing on this web fashion site.",
+                rating: 5,
+                heading: "Great Selection and Quality",
+                productName: "SoundForm Rise",
+                productPrice: "$7.95",
+                productImage: "feature2",
+                productLink: "#"
               },
               {
-                name: "Mike Johnson",
-                role: "Customer",
-                text: "Highly recommended!",
-                rating: 5
+                name: "Peter Rope",
+                role: "Customer from USA",
+                text: "I finally found a web fashion site with stylish and flattering options in my size.",
+                rating: 5,
+                heading: "Best Customer Service",
+                productName: "UltraGlass 2 Treated Screen Protector for iPhone 15 Pro",
+                productPrice: "From $18.95",
+                productImage: "feature3",
+                productLink: "#"
               }
             ]
           }
@@ -58,25 +82,42 @@ const TestimonialSection: React.FC = () => {
   // Get testimonialSection from config with fallback
   const testimonialSection: TestimonialSectionType = config.testimonialSection || {
     title: "Customer Testimonials",
+    subtitle: "See what our satisfied customers have to say about our electronic accessories.",
+    layout: "model1",
     navigationLabels: { previous: "Previous", next: "Next" },
     testimonials: [
       {
-        name: "John Doe",
-        role: "Customer",
-        text: "Great service and fast delivery!",
-        rating: 5
+        name: "Robert Smith",
+        role: "Customer from USA",
+        text: "I always find something stylish and affordable on this web fashion site",
+        rating: 5,
+        heading: "Best Online Fashion Site",
+        productName: "3-in-1 Wireless Charger with Official MagSafe Charging 15W",
+        productPrice: "$105.95",
+        productImage: "feature1",
+        productLink: "#"
       },
       {
-        name: "Jane Smith",
-        role: "Customer",
-        text: "Excellent quality products.",
-        rating: 5
+        name: "Allen Lyn",
+        role: "Customer from France",
+        text: "I love the variety of styles and the high-quality clothing on this web fashion site.",
+        rating: 5,
+        heading: "Great Selection and Quality",
+        productName: "SoundForm Rise",
+        productPrice: "$7.95",
+        productImage: "feature2",
+        productLink: "#"
       },
       {
-        name: "Mike Johnson",
-        role: "Customer",
-        text: "Highly recommended!",
-        rating: 5
+        name: "Peter Rope",
+        role: "Customer from USA",
+        text: "I finally found a web fashion site with stylish and flattering options in my size.",
+        rating: 5,
+        heading: "Best Customer Service",
+        productName: "UltraGlass 2 Treated Screen Protector for iPhone 15 Pro",
+        productPrice: "From $18.95",
+        productImage: "feature3",
+        productLink: "#"
       }
     ]
   };
@@ -87,15 +128,182 @@ const TestimonialSection: React.FC = () => {
   }
 
   const testimonials = testimonialSection.testimonials || [];
+  const layout = testimonialSection.layout || 'model1';
 
   const nextTestimonial = (): void => {
-    setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+    if (layout === 'model2') {
+      setStartIndex((prev) => (prev + 1) % testimonials.length);
+    } else {
+      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+    }
   };
 
   const prevTestimonial = (): void => {
-    setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    if (layout === 'model2') {
+      setStartIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    } else {
+      setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    }
   };
 
+  // Render Model 2 (Happy Clients Layout)
+  if (layout === 'model2') {
+    const getVisibleIndices = () => {
+      if (testimonials.length === 0) return [];
+      if (testimonials.length === 1) return [0];
+      if (testimonials.length === 2) return [0, 1];
+      
+      return [
+        startIndex % testimonials.length,
+        (startIndex + 1) % testimonials.length,
+        (startIndex + 2) % testimonials.length
+      ];
+    };
+
+    const visibleIndices = getVisibleIndices();
+
+    return (
+      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4" style={{ fontFamily: "'Albert Sans', sans-serif" }}>
+              {testimonialSection.title || "Happy Clients"}
+            </h2>
+            {testimonialSection.subtitle && (
+              <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                {testimonialSection.subtitle}
+              </p>
+            )}
+          </div>
+
+          {/* Cards & Carousel Wrapper */}
+          <div className="relative flex items-center justify-between w-full max-w-[1600px] mx-auto px-2 sm:px-12">
+            {/* Left Button */}
+            {testimonials.length > 1 && (
+              <button
+                onClick={prevTestimonial}
+                className="absolute left-0 sm:left-2 z-10 p-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all duration-200 text-gray-600 hover:text-gray-900 focus:outline-none"
+                aria-label={testimonialSection.navigationLabels?.previous || "Previous"}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+
+            {/* Grid of Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full px-6 sm:px-8">
+              {visibleIndices.map((origIndex, idx) => {
+                const testimonial = testimonials[origIndex];
+                if (!testimonial) return null;
+                
+                // Hide second card on mobile, third card on mobile and tablet
+                const visibilityClass = idx === 0 
+                  ? "block w-full" 
+                  : idx === 1 
+                    ? "hidden md:block w-full" 
+                    : "hidden lg:block w-full";
+
+                return (
+                  <div
+                    key={`${origIndex}-${idx}`}
+                    className={`${visibilityClass} bg-white rounded-xl p-6 sm:p-8 border border-gray-100 flex flex-col justify-between h-full shadow-sm hover:shadow-md transition-shadow duration-300`}
+                  >
+                    {/* Top Content */}
+                    <div>
+                      {/* Green Star Rating */}
+                      <div className="flex items-center gap-1 mb-4">
+                        {[...Array(Number(testimonial.rating || 5))].map((_, i) => (
+                          <svg
+                            key={i}
+                            className="w-4 h-4 text-[#54d175]"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                          </svg>
+                        ))}
+                      </div>
+
+                      {/* Heading */}
+                      {testimonial.heading && (
+                        <h3 className="text-lg font-bold text-gray-900 mb-3" style={{ fontFamily: "'Albert Sans', sans-serif" }}>
+                          {testimonial.heading}
+                        </h3>
+                      )}
+
+                      {/* Review text */}
+                      <blockquote className="text-gray-600 text-sm sm:text-base mb-6 leading-relaxed">
+                        " {testimonial.text} "
+                      </blockquote>
+                    </div>
+
+                    {/* Bottom Author & Product */}
+                    <div>
+                      {/* Author details */}
+                      <div className="mb-5">
+                        <div className="font-bold text-gray-900 text-sm" style={{ fontFamily: "'Albert Sans', sans-serif" }}>
+                          {testimonial.name}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-0.5">
+                          {testimonial.role}
+                        </div>
+                      </div>
+
+                      {/* Product Section (if defined) */}
+                      {testimonial.productName && (
+                        <>
+                          <div className="border-t border-gray-100 my-5"></div>
+                          <a
+                            href={testimonial.productLink || "#"}
+                            className="flex items-center hover:opacity-95 transition-opacity duration-200"
+                          >
+                            {testimonial.productImage && (
+                              <img
+                                src={getImageUrl(testimonial.productImage)}
+                                alt={testimonial.productName}
+                                className="w-14 h-14 object-contain mr-4 rounded bg-gray-50 p-1 flex-shrink-0"
+                              />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2 hover:underline">
+                                {testimonial.productName}
+                              </h4>
+                              {testimonial.productPrice && (
+                                <p className="text-xs sm:text-sm font-bold text-gray-900 mt-1">
+                                  {testimonial.productPrice}
+                                </p>
+                              )}
+                            </div>
+                          </a>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Right Button */}
+            {testimonials.length > 1 && (
+              <button
+                onClick={nextTestimonial}
+                className="absolute right-0 sm:right-2 z-10 p-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all duration-200 text-gray-600 hover:text-gray-900 focus:outline-none"
+                aria-label={testimonialSection.navigationLabels?.next || "Next"}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Fallback to Model 1 (Classic Slider)
   const current: Testimonial = testimonials[currentTestimonial] || testimonials[0];
 
   return (
