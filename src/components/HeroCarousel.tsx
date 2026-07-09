@@ -58,11 +58,11 @@ const HeroCarousel = () => {
     const isTablet = windowWidth > 768 && windowWidth <= 1024;
     
     // Calculate offsets based on screen size
-    let xOffset = 950;
+    let xOffset = 1265;
     if (isMobile) {
-      xOffset = 280;
+      xOffset = 350;
     } else if (isTablet) {
-      xOffset = 500;
+      xOffset = 590;
     }
     
     const total = slides.length;
@@ -198,7 +198,7 @@ const HeroCarousel = () => {
           if (heading) {
             gsap.fromTo(heading, 
               { y: 30, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.2 }
+              { y: 0, opacity: 1, duration: 1.2, ease: "power3.out", delay: 0.3 }
             );
           }
           
@@ -206,7 +206,7 @@ const HeroCarousel = () => {
           if (subheading) {
             gsap.fromTo(subheading,
               { y: 20, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.35 }
+              { y: 0, opacity: 1, duration: 1.2, ease: "power3.out", delay: 0.5 }
             );
           }
           
@@ -214,7 +214,7 @@ const HeroCarousel = () => {
           if (button) {
             gsap.fromTo(button,
               { y: 15, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.5 }
+              { y: 0, opacity: 1, duration: 1.2, ease: "power3.out", delay: 0.7 }
             );
           }
         }
@@ -257,7 +257,7 @@ const HeroCarousel = () => {
   };
 
   const getSlideClass = (index) => {
-    const baseClass = "absolute flex flex-col items-center justify-center bg-transparent rounded-2xl left-1/2 top-1/2 overflow-hidden";
+    const baseClass = "absolute flex flex-col items-center justify-center bg-transparent rounded-2xl left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden";
     const sizeClass = index === activeIndex ? "carousel-card-active" : "carousel-card-inactive";
     
     if (index === activeIndex) {
@@ -268,9 +268,62 @@ const HeroCarousel = () => {
   };
 
   const getSlideStyle = (index) => {
+    const isMobile = windowWidth <= 768;
+    const isTablet = windowWidth > 768 && windowWidth <= 1024;
+    
+    // Calculate offsets based on screen size
+    let xOffset = 1265;
+    if (isMobile) {
+      xOffset = 350;
+    } else if (isTablet) {
+      xOffset = 590;
+    }
+
+    const total = slides.length;
+    let x = 0;
+    let scale = 0.8;
+    let opacity = 0;
+    let zIndex = 0;
+
+    if (total > 0) {
+      let diff = index - activeIndex;
+      if (diff > total / 2) diff -= total;
+      if (diff < -total / 2) diff += total;
+
+      if (diff === 0) {
+        x = 0;
+        scale = 1;
+        opacity = 1;
+        zIndex = 20;
+      } else if (diff === -1) {
+        x = -xOffset;
+        scale = 0.9;
+        opacity = 0.4;
+        zIndex = 10;
+      } else if (diff === 1) {
+        x = xOffset;
+        scale = 0.9;
+        opacity = 0.4;
+        zIndex = 10;
+      } else if (diff < -1) {
+        x = -xOffset * 1.5;
+        scale = 0.8;
+        opacity = 0;
+        zIndex = 0;
+      } else {
+        x = xOffset * 1.5;
+        scale = 0.8;
+        opacity = 0;
+        zIndex = 0;
+      }
+    }
+
     return {
       fontFamily: "'Albert Sans', sans-serif",
       boxSizing: 'border-box' as const,
+      transform: `translate(calc(-50% + ${x}px), -50%) scale(${scale})`,
+      opacity: opacity,
+      zIndex: zIndex,
     };
   };
 
@@ -357,7 +410,7 @@ const HeroCarousel = () => {
                         ? 'text-[28px] sm:text-[40px] lg:text-[56px]' 
                         : 'text-[20px] sm:text-[30px] lg:text-[40px]'
                     }`}
-                    style={{ color: slide.textColor || '#000000' }}
+                    style={{ color: slide.textColor || '#000000', opacity: 0 }}
                   >
                     {slide.heading.split('\n').map((line, lineIndex) => (
                       <React.Fragment key={lineIndex}>
@@ -374,7 +427,7 @@ const HeroCarousel = () => {
                         ? 'text-[12px] sm:text-[16px] lg:text-[20px]' 
                         : 'text-[10px] sm:text-[14px] lg:text-[16px]'
                     }`}
-                    style={{ color: slide.textColor || '#000000' }}
+                    style={{ color: slide.textColor || '#000000', opacity: 0 }}
                   >
                     {slide.subheading}
                   </p>
@@ -385,7 +438,8 @@ const HeroCarousel = () => {
                     style={{ 
                       marginTop: '30px',
                       borderColor: slide.textColor || '#000000',
-                      color: slide.textColor || '#000000'
+                      color: slide.textColor || '#000000',
+                      opacity: 0
                     }}
                     className="inline-flex items-center border-2 px-4 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-lg font-medium transition-all duration-300 hover:bg-black hover:!text-white group"
                   >
