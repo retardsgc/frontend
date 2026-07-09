@@ -97,22 +97,48 @@ class SiteConfigService {
         }))
       : [
           {
-            name: "John Doe",
-            role: "Customer",
-            text: "Great service and fast delivery!",
-            rating: 5
+            name: "Robert Smith",
+            role: "Customer from USA",
+            text: "I always find something stylish and affordable on this web fashion site.",
+            rating: 5,
+            heading: "Best Online Fashion Site",
+            productName: "Three Device Wireless Charger",
+            productPrice: "$49.99",
+            productImage: "/images/three-device-wireless-charger.png",
+            productLink: "/products"
           },
           {
-            name: "Jane Smith",
-            role: "Customer",
-            text: "Excellent quality products.",
-            rating: 5
+            name: "Allen Lyn",
+            role: "Customer from France",
+            text: "I love the variety of styles and the high-quality clothing on this web fashion site.",
+            rating: 5,
+            heading: "Great Selection and Quality",
+            productName: "Wireless Earbuds Pro",
+            productPrice: "$129.99",
+            productImage: "/images/wireless-white-beats-earbuds.png",
+            productLink: "/products"
           },
           {
-            name: "Mike Johnson",
-            role: "Customer",
-            text: "Highly recommended!",
-            rating: 5
+            name: "Peter Rope",
+            role: "Customer from USA",
+            text: "I finally found a web fashion site with stylish and flattering options in my size.",
+            rating: 5,
+            heading: "Best Customer Service",
+            productName: "Phone Case",
+            productPrice: "$24.99",
+            productImage: "/images/phone-case.png",
+            productLink: "/products"
+          },
+          {
+            name: "Hellen Ase",
+            role: "Customer from Japan",
+            text: "Amazing products every time. The quality never disappoints and shipping is fast.",
+            rating: 5,
+            heading: "Consistently Great Quality",
+            productName: "Red Beats AirPods",
+            productPrice: "$159.99",
+            productImage: "/images/red-beats-airpods.png",
+            productLink: "/products"
           }
         ];
 
