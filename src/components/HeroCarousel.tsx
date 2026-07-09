@@ -198,7 +198,7 @@ const HeroCarousel = () => {
           if (heading) {
             gsap.fromTo(heading, 
               { y: 30, opacity: 0 },
-              { y: 0, opacity: 1, duration: 1.2, ease: "power3.out", delay: 0.3 }
+              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.2 }
             );
           }
           
@@ -206,7 +206,7 @@ const HeroCarousel = () => {
           if (subheading) {
             gsap.fromTo(subheading,
               { y: 20, opacity: 0 },
-              { y: 0, opacity: 1, duration: 1.2, ease: "power3.out", delay: 0.5 }
+              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.35 }
             );
           }
           
@@ -214,18 +214,27 @@ const HeroCarousel = () => {
           if (button) {
             gsap.fromTo(button,
               { y: 15, opacity: 0 },
-              { y: 0, opacity: 1, duration: 1.2, ease: "power3.out", delay: 0.7 }
+              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.5 }
             );
           }
         }
         
         if (image) {
-          // Slide image in from left/right depending on navigation direction
-          const startX = slideDirection.current === 'next' ? 120 : -120;
-          gsap.fromTo(image,
-            { x: startX, opacity: 0 },
-            { x: 0, opacity: 1, duration: 1.0, ease: "power3.out", delay: 0.1 }
-          );
+          const isInitialLoad = prevActiveIndexRef.current === null;
+          if (isInitialLoad) {
+            // Fade in cleanly without sliding horizontally on initial page load
+            gsap.fromTo(image,
+              { opacity: 0 },
+              { opacity: 1, duration: 1.0, ease: "power3.out" }
+            );
+          } else {
+            // Slide image in from left/right depending on navigation direction
+            const startX = slideDirection.current === 'next' ? 120 : -120;
+            gsap.fromTo(image,
+              { x: startX, opacity: 0 },
+              { x: 0, opacity: 1, duration: 1.0, ease: "power3.out", delay: 0.1 }
+            );
+          }
         }
       } else {
         // Clear content animations for inactive slides to keep them clean
