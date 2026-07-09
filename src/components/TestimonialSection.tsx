@@ -101,7 +101,7 @@ const HappyClientsModel: React.FC<{ testimonialSection: TestimonialSectionType }
                   className="flex-shrink-0 px-2.5"
                 >
                   {/* ─── Card ─── */}
-                  <div className="bg-white rounded-xl border border-gray-200 flex flex-col h-full transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1.5 hover:border-gray-300">
+                  <div className="group/card bg-white rounded-xl border border-gray-100 flex flex-col h-full shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all duration-500 ease-out hover:shadow-[0_12px_32px_rgba(0,0,0,0.06)] hover:border-gray-300/80">
 
                     {/* Card body: stars → heading → review text */}
                     <div className="px-6 pt-6 pb-5 flex-1 flex flex-col">
@@ -155,16 +155,18 @@ const HappyClientsModel: React.FC<{ testimonialSection: TestimonialSectionType }
                             href={testimonial.productLink || '#'}
                             className="flex items-center gap-3 group"
                           >
-                            {/* Product thumbnail */}
+                            {/* Product thumbnail wrapper for zoom */}
                             {testimonial.productImage ? (
-                              <img
-                                src={getImageUrl(testimonial.productImage)}
-                                alt={testimonial.productName}
-                                className="w-12 h-12 object-contain rounded bg-gray-50 border border-gray-100 flex-shrink-0 p-0.5"
-                                onError={(e) => {
-                                  (e.currentTarget as HTMLImageElement).style.display = 'none';
-                                }}
-                              />
+                              <div className="w-12 h-12 rounded bg-gray-50 border border-gray-100 flex-shrink-0 overflow-hidden p-0.5 flex items-center justify-center">
+                                <img
+                                  src={getImageUrl(testimonial.productImage)}
+                                  alt={testimonial.productName}
+                                  className="max-w-full max-h-full object-contain transition-transform duration-500 ease-out group-hover/card:scale-110"
+                                  onError={(e) => {
+                                    (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none';
+                                  }}
+                                />
+                              </div>
                             ) : (
                               /* Placeholder box when no image */
                               <div className="w-12 h-12 rounded bg-gray-100 border border-gray-200 flex-shrink-0 flex items-center justify-center">
@@ -186,9 +188,9 @@ const HappyClientsModel: React.FC<{ testimonialSection: TestimonialSectionType }
                               )}
                             </div>
 
-                            {/* ↗ Arrow circle button */}
-                            <div className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center flex-shrink-0 group-hover:border-gray-700 group-hover:bg-gray-50 transition-all duration-200">
-                              <svg className="w-3.5 h-3.5 text-gray-500 group-hover:text-gray-800 transition-colors duration-200" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            {/* ↗ Arrow circle button - premium transitions */}
+                            <div className="w-8 h-8 rounded-full border border-gray-200 bg-gray-50/50 flex items-center justify-center flex-shrink-0 transition-all duration-500 ease-out group-hover/card:border-gray-900 group-hover/card:bg-gray-900 group-hover/card:shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                              <svg className="w-3.5 h-3.5 text-gray-400 transition-all duration-500 ease-out group-hover/card:text-white group-hover/card:translate-x-0.5 group-hover/card:-translate-y-0.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M17 7H7M17 7V17" />
                               </svg>
                             </div>
