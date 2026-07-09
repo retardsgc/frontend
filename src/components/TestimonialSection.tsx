@@ -51,8 +51,8 @@ const HappyClientsModel: React.FC<{ testimonialSection: TestimonialSectionType }
         {/* Header */}
         <div className="text-center mb-10 sm:mb-12">
           <h2
-            className="text-[2.6rem] sm:text-[3.2rem] lg:text-[3.8rem] font-normal text-gray-900 mb-3 leading-none"
-            style={{ fontFamily: "'Outfit', 'Georgia', 'Albert Sans', serif", letterSpacing: '-0.02em' }}
+            className="text-[2.6rem] sm:text-[3.2rem] lg:text-[3.8rem] font-normal text-gray-900 mb-3 leading-none font-albert"
+            style={{ fontFamily: "'Albert Sans', sans-serif", letterSpacing: '-0.02em' }}
           >
             {testimonialSection.title || 'Happy Clients'}
           </h2>
@@ -117,8 +117,8 @@ const HappyClientsModel: React.FC<{ testimonialSection: TestimonialSectionType }
                       {/* Heading */}
                       {testimonial.heading && (
                         <h3
-                          className="font-semibold text-gray-900 text-[15px] mb-2.5 leading-snug"
-                          style={{ fontFamily: "'Outfit', 'Albert Sans', sans-serif" }}
+                          className="font-semibold text-gray-900 text-[15px] mb-2.5 leading-snug font-albert"
+                          style={{ fontFamily: "'Albert Sans', sans-serif" }}
                         >
                           {testimonial.heading}
                         </h3>
@@ -136,8 +136,8 @@ const HappyClientsModel: React.FC<{ testimonialSection: TestimonialSectionType }
                     {/* Author */}
                     <div className="px-6 py-4">
                       <p
-                        className="text-sm font-semibold text-gray-900 leading-none mb-1"
-                        style={{ fontFamily: "'Outfit', 'Albert Sans', sans-serif" }}
+                        className="text-sm font-semibold text-gray-900 leading-none mb-1 font-albert"
+                        style={{ fontFamily: "'Albert Sans', sans-serif" }}
                       >
                         {testimonial.name}
                       </p>
