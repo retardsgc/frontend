@@ -38,6 +38,7 @@ export interface FeatureItem {
 }
 
 export interface FeaturesSection {
+  enabled?: boolean;
   title: string;
   subtitle: string;
   features: FeatureItem[];
@@ -55,6 +56,7 @@ export interface Collection {
 }
 
 export interface FeaturedCollections {
+  enabled?: boolean;
   title: string;
   collections: Collection[];
 }
@@ -68,6 +70,7 @@ export interface Testimonial {
 }
 
 export interface TestimonialSection {
+  enabled?: boolean;
   title: string;
   testimonials: Testimonial[];
   navigationLabels: {
@@ -77,6 +80,7 @@ export interface TestimonialSection {
 }
 
 export interface HotDealsSection {
+  enabled?: boolean;
   title: string;
   subtitle: string;
   viewAllText: string;
@@ -88,10 +92,10 @@ export interface HotDealsSection {
 }
 
 export interface HomePage {
-  featuresSection: FeaturesSection;
-  featuredCollections: FeaturedCollections;
-  hotDealsSection: HotDealsSection;
-  testimonialSection: TestimonialSection;
+  featuresSection?: FeaturesSection;
+  featuredCollections?: FeaturedCollections;
+  hotDealsSection?: HotDealsSection;
+  testimonialSection?: TestimonialSection;
 }
 
 export interface SocialMediaLink {

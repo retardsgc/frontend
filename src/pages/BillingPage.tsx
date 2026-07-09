@@ -91,7 +91,7 @@ const BillingPage: React.FC<BillingPageProps> = () => {
     // Validate shipping address
     const validation = orderService.validateShippingAddress(shippingAddress);
     if (!validation.isValid) {
-      setErrors(validation.errors);
+      setErrors(validation.errors as Record<string, string>);
       return;
     }
 

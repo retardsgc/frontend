@@ -48,7 +48,7 @@ const ServiceFeaturesSection: React.FC = () => {
 
   // Render icon dynamically from Lucide
   const renderIcon = (iconName: string, className: string = "w-10 h-10") => {
-    const IconComponent = Icons[iconName as keyof typeof Icons];
+    const IconComponent = Icons[iconName as keyof typeof Icons] as React.ComponentType<any>;
     if (IconComponent) {
       return <IconComponent className={className} />;
     }
