@@ -198,7 +198,7 @@ const HeroCarousel = () => {
           if (heading) {
             gsap.fromTo(heading, 
               { y: 30, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.2 }
+              { y: 0, opacity: 1, duration: 0.5, ease: "power3.out", delay: 0.1 }
             );
           }
           
@@ -206,7 +206,7 @@ const HeroCarousel = () => {
           if (subheading) {
             gsap.fromTo(subheading,
               { y: 20, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.35 }
+              { y: 0, opacity: 1, duration: 0.5, ease: "power3.out", delay: 0.2 }
             );
           }
           
@@ -214,7 +214,7 @@ const HeroCarousel = () => {
           if (button) {
             gsap.fromTo(button,
               { y: 15, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.5 }
+              { y: 0, opacity: 1, duration: 0.5, ease: "power3.out", delay: 0.3 }
             );
           }
         }
