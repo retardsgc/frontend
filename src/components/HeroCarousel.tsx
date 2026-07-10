@@ -194,31 +194,24 @@ const HeroCarousel = () => {
           const subheading = content.querySelector('p');
           const button = content.querySelector('a');
 
-          const isInitialLoad = prevActiveIndex === null;
-
-          if (isInitialLoad) {
-            // On initial page load: pop up text snappily
-            if (heading) {
-              gsap.fromTo(heading, 
-                { y: 30, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.5, ease: "power3.out", delay: 0.1 }
-              );
-            }
-            if (subheading) {
-              gsap.fromTo(subheading,
-                { y: 20, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.5, ease: "power3.out", delay: 0.2 }
-              );
-            }
-            if (button) {
-              gsap.fromTo(button,
-                { y: 15, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.5, ease: "power3.out", delay: 0.3 }
-              );
-            }
-          } else {
-            // On navigation clicks: show content normally (instant display) so it slides with card
-            gsap.set([heading, subheading, button], { opacity: 1, y: 0 });
+          // Pop up slide text smoothly in stagger sequence every time a slide is active
+          if (heading) {
+            gsap.fromTo(heading, 
+              { y: 30, opacity: 0 },
+              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.3 }
+            );
+          }
+          if (subheading) {
+            gsap.fromTo(subheading,
+              { y: 20, opacity: 0 },
+              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.45 }
+            );
+          }
+          if (button) {
+            gsap.fromTo(button,
+              { y: 15, opacity: 0 },
+              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.6 }
+            );
           }
         }
 
@@ -423,7 +416,7 @@ const HeroCarousel = () => {
                       }`}
                     style={{ 
                       color: slide.textColor || '#000000', 
-                      opacity: prevActiveIndexRef.current === null ? 0 : (index === activeIndex ? 1 : 0) 
+                      opacity: 0 
                     }}
                   >
                     {slide.heading.split('\n').map((line, lineIndex) => (
@@ -442,7 +435,7 @@ const HeroCarousel = () => {
                       }`}
                     style={{ 
                       color: slide.textColor || '#000000', 
-                      opacity: prevActiveIndexRef.current === null ? 0 : (index === activeIndex ? 1 : 0) 
+                      opacity: 0 
                     }}
                   >
                     {slide.subheading}
@@ -455,7 +448,7 @@ const HeroCarousel = () => {
                       marginTop: '30px',
                       borderColor: slide.textColor || '#000000',
                       color: slide.textColor || '#000000',
-                      opacity: prevActiveIndexRef.current === null ? 0 : (index === activeIndex ? 1 : 0)
+                      opacity: 0
                     }}
                     className="inline-flex items-center border-2 px-4 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-lg font-medium transition-all duration-300 hover:bg-black hover:!text-white group"
                   >
