@@ -209,7 +209,6 @@ class SiteConfigService {
   getFooter = () => this.getConfig('footer');
   getAnnouncementBar = () => this.getConfig('announcementbar');
   getHero = () => this.getConfig('hero');
-  getSEO = () => this.getConfig('seo');
   getCompany = () => this.getConfig('company');
 }
 

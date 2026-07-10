@@ -51,6 +51,9 @@ const buildCartResponse = (items) => {
   };
 };
 
+// In-flight guard for atomic localStorage writes
+let _cartWriteInFlight = false;
+
 class CartService {
   constructor() {
     this._ids = new Set();
@@ -85,6 +88,9 @@ class CartService {
   }
 
   async addToCart(productId, quantity = 1, selectedColor = '', selectedSize = '', productData = null) {
+    if (_cartWriteInFlight) return null;
+    _cartWriteInFlight = true;
+    try {
     const items = readCart();
     const pid = String(productId);
     const itemId = generateItemId(pid, selectedColor, selectedSize);
@@ -135,6 +141,16 @@ class CartService {
           name = p.name || 'Product';
           price = p.price || 0;
           images = p.images || [];
+          // Stock check: reject if explicitly out of stock
+          if (p.inStock === false || (p.stockQuantity !== undefined && p.stockQuantity <= 0)) {
+            try {
+              window.dispatchEvent(new CustomEvent('cart:limit-exceeded', {
+                detail: { message: `${name} is currently out of stock and cannot be added to the cart.` }
+              }));
+            } catch {}
+            _cartWriteInFlight = false;
+            return null;
+          }
         } catch {
           name = 'Product';
         }
@@ -146,10 +162,15 @@ class CartService {
     writeCart(items);
     this._ids.add(pid);
     try { window.dispatchEvent(new Event('cart:changed')); } catch {}
+    _cartWriteInFlight = false;
     return buildCartResponse(items);
+  } finally { _cartWriteInFlight = false; }
   }
 
   async updateCartItem(itemId, quantity, selectedColor = '', selectedSize = '') {
+    if (_cartWriteInFlight) return null;
+    _cartWriteInFlight = true;
+    try {
     const items = readCart();
     const idx = items.findIndex((it) => it.itemId === itemId);
 
@@ -181,10 +202,15 @@ class CartService {
     }
     writeCart(items);
     try { window.dispatchEvent(new Event('cart:changed')); } catch {}
+    _cartWriteInFlight = false;
     return buildCartResponse(items);
+    } finally { _cartWriteInFlight = false; }
   }
 
   async removeFromCart(itemId) {
+    if (_cartWriteInFlight) return null;
+    _cartWriteInFlight = true;
+    try {
     const items = readCart();
     const removed = items.find((it) => it.itemId === itemId);
     const newItems = items.filter((it) => it.itemId !== itemId);
@@ -194,14 +220,21 @@ class CartService {
       this._ids.delete(removed.productId);
     }
     try { window.dispatchEvent(new Event('cart:changed')); } catch {}
+    _cartWriteInFlight = false;
     return buildCartResponse(newItems);
+    } finally { _cartWriteInFlight = false; }
   }
 
   async clearCart() {
+    if (_cartWriteInFlight) return null;
+    _cartWriteInFlight = true;
+    try {
     writeCart([]);
     this._ids.clear();
     try { window.dispatchEvent(new Event('cart:changed')); } catch {}
+    _cartWriteInFlight = false;
     return buildCartResponse([]);
+    } finally { _cartWriteInFlight = false; }
   }
 
   async getCartCount() {

@@ -54,6 +54,18 @@ const HomePage: React.FC = () => (
   </>
 );
 
+// Route guard component for auth-protected routes
+const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!authService.isAuthenticated()) {
+      window.dispatchEvent(new Event('auth:openLogin'));
+      navigate('/', { replace: true });
+    }
+  }, [navigate]);
+  return authService.isAuthenticated() ? <>{children}</> : null;
+};
+
 const App: React.FC = () => {
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const [welcomeUsername, setWelcomeUsername] = useState('');
@@ -132,7 +144,7 @@ const App: React.FC = () => {
           <Route path="/products" element={<ProductListingPage />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
           <Route path="/shop" element={<ProductListingPage />} />
-          <Route path="/account" element={<AccountPage />} />
+          <Route path="/account" element={<RequireAuth><AccountPage /></RequireAuth>} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />

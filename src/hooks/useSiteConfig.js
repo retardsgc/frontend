@@ -70,7 +70,6 @@ export const useAnnouncementBar = () => useSiteConfig('announcementbar');
 export const useHero = () => useSiteConfig('hero');
 export const useProductPages = () => useSiteConfig('productPages');
 export const useCompany = () => useSiteConfig('company');
-export const useSEO = () => useSiteConfig('seo');
 export const useCart = () => useSiteConfig('cart');
 export const useCheckout = () => useSiteConfig('checkout');
 export const useErrors = () => useSiteConfig('errors');

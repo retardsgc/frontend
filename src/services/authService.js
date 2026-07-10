@@ -49,15 +49,18 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle token expiration
+// Handle token expiration - guard prevents N events for N concurrent 401s
+let _tokenExpiryHandling = false;
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !_tokenExpiryHandling) {
+      _tokenExpiryHandling = true;
       clearAuthStorage();
       window.dispatchEvent(new Event('auth:changed'));
       // Open login modal instead of redirecting to a page
       window.dispatchEvent(new Event('auth:openLogin'));
+      setTimeout(() => { _tokenExpiryHandling = false; }, 1000);
     }
     return Promise.reject(error);
   }
