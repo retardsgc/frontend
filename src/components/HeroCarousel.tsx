@@ -17,6 +17,7 @@ const HeroCarousel = () => {
 
   const slideDirection = useRef<'next' | 'prev'>('next');
   const prevActiveIndexRef = useRef<number | null>(null);
+  const initialActiveIndexRef = useRef<number | null>(null);
 
   // Generate an extended slide list to support smooth loop transitions without wrapping gaps
   const extendedSlides = React.useMemo(() => {
@@ -247,13 +248,17 @@ const HeroCarousel = () => {
     }
 
     const total = extendedSlides.length;
+    if (initialActiveIndexRef.current === null && total > 0) {
+      initialActiveIndexRef.current = activeIndex;
+    }
+
     let x = 0;
     let scale = 1;
     let opacity = 0;
     let zIndex = 0;
 
     if (total > 0) {
-      const activeIndexMod = activeIndex % total;
+      const activeIndexMod = (initialActiveIndexRef.current ?? activeIndex) % total;
       let diff = index - activeIndexMod;
       let wrappedDiff = ((diff + total / 2) % total + total) % total - total / 2;
 
