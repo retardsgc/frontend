@@ -102,14 +102,14 @@ const HeroCarousel = () => {
         pointerEvents = 'auto';
       } else if (wrappedDiff === -1) {
         x = -xOffset;
-        scale = 0.9;
-        opacity = 0.4;
+        scale = 1;
+        opacity = 1;
         zIndex = 10;
         pointerEvents = 'auto';
       } else if (wrappedDiff === 1) {
         x = xOffset;
-        scale = 0.9;
-        opacity = 0.4;
+        scale = 1;
+        opacity = 1;
         zIndex = 10;
         pointerEvents = 'auto';
       } else if (wrappedDiff < -1) {
@@ -149,23 +149,23 @@ const HeroCarousel = () => {
           const subheading = content.querySelector('p');
           const button = content.querySelector('a');
 
-          // Pop up slide text smoothly in stagger sequence every time a slide is active
+          // Pop up slide text smoothly in stagger sequence every time a slide is active (slightly slower)
           if (heading) {
             gsap.fromTo(heading, 
               { y: 30, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.3 }
+              { y: 0, opacity: 1, duration: 1.0, ease: "power3.out", delay: 0.4 }
             );
           }
           if (subheading) {
             gsap.fromTo(subheading,
               { y: 20, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.45 }
+              { y: 0, opacity: 1, duration: 1.0, ease: "power3.out", delay: 0.6 }
             );
           }
           if (button) {
             gsap.fromTo(button,
               { y: 15, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.45 }
+              { y: 0, opacity: 1, duration: 1.0, ease: "power3.out", delay: 0.75 }
             );
           }
         }
@@ -196,8 +196,8 @@ const HeroCarousel = () => {
 
           gsap.to([heading, subheading, button], {
             opacity: 0,
-            duration: 0.3,
-            ease: "power2.out",
+            duration: 0.8, // Match the slide transition duration so text goes with the slide
+            ease: "power2.inOut",
             onComplete: () => {
               gsap.set([heading, subheading, button], { y: 0 });
             }
@@ -268,13 +268,13 @@ const HeroCarousel = () => {
         zIndex = 20;
       } else if (wrappedDiff === -1) {
         x = -xOffset;
-        scale = 0.9;
-        opacity = 0.4;
+        scale = 1;
+        opacity = 1;
         zIndex = 10;
       } else if (wrappedDiff === 1) {
         x = xOffset;
-        scale = 0.9;
-        opacity = 0.4;
+        scale = 1;
+        opacity = 1;
         zIndex = 10;
       } else if (wrappedDiff < -1) {
         x = -xOffset * 1.5;
