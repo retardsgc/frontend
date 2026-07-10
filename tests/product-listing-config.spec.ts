@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 
+const E2E_BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:5177';
+const E2E_API_URL = process.env.E2E_API_URL || 'http://localhost:5001/api';
+
 /**
  * Test: Product Listing Page Title and Description from MongoDB
  * 
@@ -17,7 +20,7 @@ test.describe('Product Listing Page - Dynamic Content', () => {
     });
     
     // Navigate to the product listing page (shop)
-    await page.goto('http://localhost:5177/shop');
+    await page.goto(`${E2E_BASE_URL}/shop`);
     
     // Wait for the page to load
     await page.waitForLoadState('networkidle');
@@ -57,7 +60,7 @@ test.describe('Product Listing Page - Dynamic Content', () => {
 
   test('should fetch siteconfig API and return productPages', async ({ request }) => {
     // Directly test the API endpoint
-    const response = await request.get('http://localhost:5001/api/siteconfig');
+    const response = await request.get(`${E2E_API_URL}/siteconfig`);
     
     expect(response.ok()).toBeTruthy();
     
@@ -80,7 +83,7 @@ test.describe('Product Listing Page - Dynamic Content', () => {
     
     // Step 1: Update via API (simulating admin dashboard save)
     // First get current config
-    const getResponse = await request.get('http://localhost:5001/api/siteconfig/all');
+    const getResponse = await request.get(`${E2E_API_URL}/siteconfig/all`);
     const currentConfig = await getResponse.json();
     
     // Update productPages
@@ -95,7 +98,7 @@ test.describe('Product Listing Page - Dynamic Content', () => {
     };
     
     // Save updated config
-    const putResponse = await request.put('http://localhost:5001/api/siteconfig/all', {
+    const putResponse = await request.put(`${E2E_API_URL}/siteconfig/all`, {
       data: {
         config: updatedConfig
       }
@@ -104,7 +107,7 @@ test.describe('Product Listing Page - Dynamic Content', () => {
     expect(putResponse.ok()).toBeTruthy();
     
     // Step 2: Verify frontend displays updated content
-    await page.goto('http://localhost:5177/shop');
+    await page.goto(`${E2E_BASE_URL}/shop`);
     await page.waitForLoadState('networkidle');
     
     // Force reload to clear any cache
@@ -125,7 +128,7 @@ test.describe('Product Listing Page - Dynamic Content', () => {
       }
     };
     
-    await request.put('http://localhost:5001/api/siteconfig/all', {
+    await request.put(`${E2E_API_URL}/siteconfig/all`, {
       data: {
         config: restoreConfig
       }

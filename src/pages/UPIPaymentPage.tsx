@@ -63,6 +63,7 @@ const UPIPaymentPage: React.FC = () => {
   };
 
   const handleSubmitTransaction = async () => {
+    if (submitting) return;
     const trimmedId = transactionId.trim();
     
     // Validation

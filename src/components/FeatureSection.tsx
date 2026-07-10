@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getSiteConfig } from '../services/dataService';
+import { getSiteConfig } from '../services/dataService.js';
 import type { SiteConfig, FeaturesSection } from '../types';
 
 export default function FeatureSection(): React.ReactElement {
@@ -13,7 +13,7 @@ export default function FeatureSection(): React.ReactElement {
       } catch (error) {
         // Set fallback config on error
         setConfig({
-          homePage: {
+          homepage: {
             featuresSection: {
               title: "Featured Collections",
               subtitle: "Discover our latest collections",
@@ -50,7 +50,7 @@ export default function FeatureSection(): React.ReactElement {
   if (!config) return <div>Loading...</div>;
 
   // Get featuresSection from config with fallback
-  const featuresSection: FeaturesSection = config.homePage?.featuresSection || {
+  const featuresSection: FeaturesSection = config.homepage?.featuresSection || {
     title: "Featured Collections",
     subtitle: "Discover our latest collections",
     enabled: true,

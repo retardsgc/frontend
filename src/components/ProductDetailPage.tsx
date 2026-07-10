@@ -7,9 +7,10 @@ import {
   getRelatedProducts,
   getSiteConfig,
   calculateDiscountPercentage
-} from '../services/dataService';
+} from '../services/dataService.js';
 import cartService from '../services/cartService';
 import wishlistService from '../services/wishlistService';
+import { getImageUrl } from '../utils/imageUrl';
 
 interface ArrowIconProps {
   className?: string;
@@ -157,7 +158,7 @@ const ProductDetailPage: React.FC = () => {
     if (!currentProduct) return '';
     
     // Use displayImages which are already filtered by color
-    return displayImages[selectedImage] || displayImages[0] || currentProduct.images[0];
+    return getImageUrl(displayImages[selectedImage] || displayImages[0] || currentProduct.images[0]);
   };
 
   const { price: displayPrice, originalPrice: displayOriginalPrice } = getCurrentPrice();
@@ -549,7 +550,7 @@ const ProductDetailPage: React.FC = () => {
                   aria-label={`Show image ${index + 1}`}
                 >
                   <img
-                    src={image}
+                    src={getImageUrl(image)}
                     alt={`Product view ${index + 1}`}
                     className="w-full h-full max-w-full max-h-full object-cover"
                     style={{
@@ -700,7 +701,7 @@ const ProductDetailPage: React.FC = () => {
                       {/* Image Container */}
                       <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden relative">
                         <img
-                          src={product.images[0]}
+                          src={getImageUrl(product.images[0])}
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           loading="lazy"
@@ -827,7 +828,7 @@ const ProductDetailPage: React.FC = () => {
                         <div className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300">
                           <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden relative">
                             <img
-                              src={product.images[0]}
+                              src={getImageUrl(product.images[0])}
                               alt={product.name}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                               loading="lazy"

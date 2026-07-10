@@ -8,9 +8,10 @@ import {
   getSiteConfig, 
   filterProductsByPriceRange,
   sortProducts 
-} from '../services/dataService';
+} from '../services/dataService.js';
 import cartService from '../services/cartService';
 import wishlistService from '../services/wishlistService';
+import { getImageUrl } from '../utils/imageUrl';
 
 interface CategoryWithCount {
   name: string;
@@ -415,7 +416,7 @@ const ProductListingPage: React.FC = () => {
   <Link to={`/product/${(product._id || product.id)}`} className="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-6 p-3 sm:p-4 lg:p-6 border border-gray-200 rounded-lg hover:shadow-md transition-shadow group block">
           <div className="w-full sm:w-20 md:w-24 lg:w-32 h-48 sm:h-20 md:h-24 lg:h-32 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
             <img
-              src={product.images[0]}
+              src={getImageUrl(product.images[0])}
               alt={product.name}
               className="w-full h-full max-w-full max-h-full object-cover group-hover:scale-105 transition-transform duration-300"
               style={{
@@ -511,7 +512,7 @@ const ProductListingPage: React.FC = () => {
           {/* Image Container */}
           <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden relative">
             <img
-              src={product.images[0]}
+              src={getImageUrl(product.images[0])}
               alt={product.name}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               loading="lazy"

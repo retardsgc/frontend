@@ -3,15 +3,12 @@ import { Link } from 'react-router-dom';
 import wishlistService from '../services/wishlistService';
 import cartService from '../services/cartService';
 import { Product, Color } from '../types';
+import { getImageUrl } from '../utils/imageUrl';
 
 // Utilities
 const getPid = (p: Partial<Product> | null | undefined): string => String((p && ((p as any)._id || (p as any).id)) || '');
 const resolveImageSrc = (raw?: string): string => {
-  const src = (raw || '').trim();
-  if (!src) return '/images/placeholder.svg';
-  if (/^https?:\/\//i.test(src)) return src;
-  if (src.startsWith('/api/images/') || src.startsWith('/images/')) return src;
-  return `/images/${src.replace(/^\/?/, '')}`;
+  return getImageUrl(raw, '/images/placeholder.svg');
 };
 
 const getActivePrice = (product: Product, idx: number): number => {

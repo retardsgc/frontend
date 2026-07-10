@@ -1,6 +1,11 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 const STORAGE_KEY = 'guestCart';
 
+// Generate a stable item ID based on product + variant info
+const generateItemId = (productId, selectedColor, selectedSize) => {
+  return `${productId}_${(selectedColor || '').trim()}_${(selectedSize || '').trim()}`;
+};
+
 // Read cart items from localStorage
 const readCart = () => {
   try {
@@ -25,8 +30,8 @@ const buildCartResponse = (items) => {
   return {
     success: true,
     data: {
-      items: items.map((it, idx) => ({
-        _id: it.productId + '_' + idx,
+      items: items.map((it) => ({
+        _id: it.itemId || generateItemId(it.productId, it.selectedColor, it.selectedSize),
         product: {
           _id: it.productId,
           name: it.name,
@@ -82,11 +87,10 @@ class CartService {
   async addToCart(productId, quantity = 1, selectedColor = '', selectedSize = '', productData = null) {
     const items = readCart();
     const pid = String(productId);
+    const itemId = generateItemId(pid, selectedColor, selectedSize);
 
-    // Check if item already in cart (same product + color + size)
-    const existing = items.find(
-      (it) => String(it.productId) === pid && it.selectedColor === selectedColor && it.selectedSize === selectedSize
-    );
+    // Check if item already in cart (same product + color + size) using stable itemId
+    const existing = items.find((it) => it.itemId === itemId);
 
     // --- Cart total limit: ₹2,000 ---
     // Calculate what the price would be for this item
@@ -102,11 +106,11 @@ class CartService {
       } catch {}
     }
 
-    const currentTotal = buildCartResponse(items).data.total;
+    const currentSubtotal = buildCartResponse(items).data.subtotal;
     const addedCost = itemPrice * quantity;
     // Allow updating existing item quantity only if it was already in cart
-    if (!existing && currentTotal + addedCost > 2000) {
-      const remaining = Math.max(0, 2000 - currentTotal);
+    if (!existing && currentSubtotal + addedCost > 2000) {
+      const remaining = Math.max(0, 2000 - currentSubtotal);
       try {
         window.dispatchEvent(new CustomEvent('cart:limit-exceeded', {
           detail: { message: `Cart limit is \u20b92,000. You can add items worth up to \u20b9${remaining.toFixed(0)} more.` }
@@ -136,7 +140,7 @@ class CartService {
         }
       }
 
-      items.push({ productId: pid, name, price, images, quantity, selectedColor, selectedSize });
+      items.push({ itemId, productId: pid, name, price, images, quantity, selectedColor, selectedSize });
     }
 
     writeCart(items);
@@ -147,17 +151,14 @@ class CartService {
 
   async updateCartItem(itemId, quantity, selectedColor = '', selectedSize = '') {
     const items = readCart();
-    // itemId format: productId_index
-    const [pid] = itemId.split('_');
-    const idx = items.findIndex((it) => String(it.productId) === pid);
+    const idx = items.findIndex((it) => it.itemId === itemId);
 
     // Check ₹2,000 limit before updating quantity
     if (idx !== -1) {
       const itemPrice = items[idx].price || 0;
       const otherItemsTotal = items.reduce((sum, it, i) => i !== idx ? sum + it.price * it.quantity : sum, 0);
-      const shipping = otherItemsTotal + itemPrice * quantity > 50 ? 0 : (items.length > 0 ? 10 : 0);
-      const newTotal = otherItemsTotal + itemPrice * quantity + shipping;
-      if (newTotal > 2000) {
+      const newSubtotal = otherItemsTotal + itemPrice * quantity;
+      if (newSubtotal > 2000) {
         const maxQty = Math.floor((2000 - otherItemsTotal) / itemPrice);
         const remaining = Math.max(0, 2000 - otherItemsTotal - itemPrice * items[idx].quantity);
         try {
@@ -185,10 +186,13 @@ class CartService {
 
   async removeFromCart(itemId) {
     const items = readCart();
-    const [pid] = itemId.split('_');
-    const newItems = items.filter((it) => String(it.productId) !== pid);
+    const removed = items.find((it) => it.itemId === itemId);
+    const newItems = items.filter((it) => it.itemId !== itemId);
     writeCart(newItems);
-    this._ids.delete(pid);
+    // Remove productId from ids set if no other variants of this product remain
+    if (removed && !newItems.some((it) => it.productId === removed.productId)) {
+      this._ids.delete(removed.productId);
+    }
     try { window.dispatchEvent(new Event('cart:changed')); } catch {}
     return buildCartResponse(newItems);
   }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import orderService from '../services/orderService';
+import { getImageUrl, PLACEHOLDER_IMAGE } from '../utils/imageUrl';
 
 interface TrackingStep {
   status: string;
@@ -226,7 +227,7 @@ const OrderTracking: React.FC = () => {
                 {/* Product Image */}
                 <div className="flex-shrink-0">
                   <img
-                    src={item.image || '/images/placeholder.jpg'}
+                    src={getImageUrl(item.image || PLACEHOLDER_IMAGE)}
                     alt={item.name}
                     className="w-16 h-20 sm:w-20 sm:h-24 lg:w-24 lg:h-28 object-cover rounded lg:rounded-lg border border-gray-100"
                   />

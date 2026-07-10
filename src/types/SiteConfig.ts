@@ -1,20 +1,19 @@
 // Site configuration types
 export interface Logo {
-  light: string;
-  dark: string;
+  url: string;
   alt: string;
 }
 
 export interface Branding {
-  name: string;
-  tagline: string;
   logo: Logo;
-  favicon: string;
+  faviconUrl: string;
 }
 
 export interface AnnouncementBar {
-  isActive: boolean;
+  enabled: boolean;
   announcements: string[];
+  backgroundColor?: string;
+  textColor?: string;
 }
 
 export interface HeroSlide {
@@ -126,9 +125,9 @@ export interface ContactUs {
 
 export interface SiteConfig {
   branding: Branding;
-  announcementBar: AnnouncementBar;
+  announcementbar: AnnouncementBar;
   hero: Hero;
-  homePage: HomePage;
+  homepage: HomePage;
   contactUs: ContactUs;
   [key: string]: any; // For other config properties
 }

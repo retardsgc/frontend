@@ -22,8 +22,8 @@
 
 import { test, expect, Page } from '@playwright/test';
 
-const BASE_URL = 'http://localhost:5177';
-const API_URL = 'http://localhost:5001';
+const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:5177';
+const API_URL = process.env.E2E_API_URL || 'http://localhost:5001';
 
 // Test user credentials
 const TEST_USER = {

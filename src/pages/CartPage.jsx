@@ -18,6 +18,11 @@ const CartPage = () => {
 
   useEffect(() => {
     fetchCart();
+    const onLimitExceeded = (e) => {
+      showToast(e.detail?.message || 'Cart limit reached', 'error');
+    };
+    window.addEventListener('cart:limit-exceeded', onLimitExceeded);
+    return () => window.removeEventListener('cart:limit-exceeded', onLimitExceeded);
   }, []);
 
   const fetchCart = async () => {
@@ -36,7 +41,10 @@ const CartPage = () => {
   };
 
   const handleQuantityChange = async (itemId, newQuantity) => {
-    if (newQuantity < 1) return;
+    if (newQuantity < 1) {
+      await handleRemoveItem(itemId);
+      return;
+    }
     setError('');
     
     try {

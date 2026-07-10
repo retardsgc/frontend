@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { Product } from '../types';
-import { getHotDealProducts, calculateDiscountPercentage } from '../services/dataService';
+import { getHotDealProducts, calculateDiscountPercentage } from '../services/dataService.js';
 import siteConfigService from '../services/siteConfigService';
+import { getImageUrl } from '../utils/imageUrl';
 
 // Icon Props interface
 interface IconProps {
@@ -87,16 +88,7 @@ const DealCard: React.FC<DealCardProps> = ({ deal, onColorSelect, onCloseDeal })
   const hasColors = deal.colors && deal.colors.length > 0;
   // Normalize and sanitize image URL from product data
   const resolveImageSrc = (raw?: string): string => {
-    const src = (raw || '').trim();
-    if (!src) return '/images/placeholder.svg';
-    // If absolute URL, return as-is
-    if (/^https?:\/\//i.test(src)) return src;
-    // If already points to API images or proper root images path, keep
-    if (src.startsWith('/api/images/')) return src;
-    // Ensure it starts with /images/
-    if (src.startsWith('/images/')) return src;
-    // Handle values like 'images/...' or filename only
-    return `/images/${src.replace(/^\/?/, '')}`;
+    return getImageUrl(raw, '/images/placeholder.svg');
   };
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>): void => {

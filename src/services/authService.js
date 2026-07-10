@@ -94,6 +94,25 @@ class AuthService {
     }
   }
 
+  // Merge guest cart into user-scoped cart on successful auth
+  // Cart is currently localStorage-only (key: guestCart), so this preserves
+  // guest items across login (forward-compatible if per-user keys are added later)
+  _mergeGuestCart() {
+    try {
+      const guestCartRaw = localStorage.getItem('guestCart');
+      if (guestCartRaw) {
+        const guestItems = JSON.parse(guestCartRaw);
+        if (Array.isArray(guestItems) && guestItems.length > 0) {
+          // CartService uses the same guestCart key for all users — items are already accessible.
+          // Setting a merge flag for future per-user key support.
+          localStorage.setItem('guestCartMerged', 'true');
+        }
+      }
+    } catch {
+      // Silently ignore parse errors
+    }
+  }
+
   // Register new user
   async signup(userData) {
     try {
@@ -101,6 +120,7 @@ class AuthService {
       if (response.data.success) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.data));
+        this._mergeGuestCart();
         window.dispatchEvent(new Event('auth:changed'));
       }
       return response.data;
@@ -127,6 +147,7 @@ class AuthService {
           localStorage.removeItem('rememberedEmail');
         }
         
+        this._mergeGuestCart();
         window.dispatchEvent(new Event('auth:changed'));
       }
       return response.data;

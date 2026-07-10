@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Product, Category } from '../types';
-import { searchProducts, getCategories, getHotDealProducts, getBestsellerProducts, getProducts } from '../services/dataService';
+import { searchProducts, getCategories, getHotDealProducts, getBestsellerProducts, getProducts } from '../services/dataService.js';
 import cartService from '../services/cartService';
 import wishlistService from '../services/wishlistService';
+import { getImageUrl } from '../utils/imageUrl';
 
 // Simple fuzzy search function for local product matching
 const fuzzyMatch = (text: string, query: string): number => {
@@ -42,7 +43,7 @@ const PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/20
 
 // Helper to get product image with fallback
 const getProductImage = (product: Product): string => {
-  return product.images?.[0] || PLACEHOLDER_IMAGE;
+  return getImageUrl(product.images?.[0]);
 };
 
 interface SearchSidebarProps {

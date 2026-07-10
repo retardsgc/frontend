@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import orderService from '../services/orderService';
+import { getImageUrl, PLACEHOLDER_IMAGE } from '../utils/imageUrl';
 
 interface OrderItem {
   _id?: string;
@@ -85,7 +86,7 @@ const OrderDetails: React.FC = () => {
           {order.items.map((item) => (
             <div key={item._id || item.product} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">
               <img
-                src={item.image || '/images/placeholder.jpg'}
+                src={getImageUrl(item.image || PLACEHOLDER_IMAGE)}
                 alt={item.name}
                 className="w-16 h-16 object-cover rounded"
               />

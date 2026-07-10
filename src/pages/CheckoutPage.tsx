@@ -4,6 +4,7 @@ import cartService from '../services/cartService';
 import authService from '../services/authService';
 import addressService, { Address } from '../services/addressService';
 import orderService from '../services/orderService';
+import { getImageUrl } from '../utils/imageUrl';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -244,6 +245,7 @@ const CheckoutPage: React.FC = () => {
   };
 
   const handlePlaceOrder = async () => {
+    if (submitting) return;
     setError('');
     
     if (!validateForm()) {
@@ -562,7 +564,7 @@ const CheckoutPage: React.FC = () => {
                   <div key={item._id} className="flex items-center space-x-3 sm:space-x-4">
                     <div className="relative w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
                       <img
-                        src={item.product.images?.[0] || '/images/placeholder.svg'}
+                        src={getImageUrl(item.product.images?.[0])}
                         alt={item.product.name}
                         className="w-full h-full object-cover"
                       />
