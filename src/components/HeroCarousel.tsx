@@ -68,10 +68,13 @@ const HeroCarousel = () => {
     const isMobile = windowWidth <= 768;
     const isTablet = windowWidth > 768 && windowWidth <= 1024;
 
-    const activeWidth = isMobile ? 300 : (isTablet ? 600 : 1200);
-    const inactiveWidth = isMobile ? 80 : (isTablet ? 150 : 300);
-    const gap = isMobile ? 10 : (isTablet ? 20 : 30);
-    const xOffset = (activeWidth / 2) + gap + (inactiveWidth / 2);
+    // Calculate offsets based on screen size (card width + gap)
+    let xOffset = 1350; // 1300 width + 50 gap (slightly increased)
+    if (isMobile) {
+      xOffset = 370; // 350 width + 20 gap
+    } else if (isTablet) {
+      xOffset = 630; // 600 width + 30 gap
+    }
 
     const total = extendedSlides.length;
     if (total === 0) return;
@@ -87,7 +90,6 @@ const HeroCarousel = () => {
 
       let x = 0;
       let scale = 1;
-      let cardWidth = inactiveWidth;
       let opacity = 0;
       let zIndex = 0;
       let pointerEvents = 'none';
@@ -95,46 +97,40 @@ const HeroCarousel = () => {
       if (wrappedDiff === 0) {
         x = 0;
         scale = 1;
-        cardWidth = activeWidth;
         opacity = 1;
         zIndex = 20;
         pointerEvents = 'auto';
       } else if (wrappedDiff === -1) {
         x = -xOffset;
         scale = 1;
-        cardWidth = inactiveWidth;
         opacity = 1;
         zIndex = 10;
         pointerEvents = 'auto';
       } else if (wrappedDiff === 1) {
         x = xOffset;
         scale = 1;
-        cardWidth = inactiveWidth;
         opacity = 1;
         zIndex = 10;
         pointerEvents = 'auto';
       } else if (wrappedDiff < -1) {
         x = -xOffset * 1.5;
         scale = 1;
-        cardWidth = inactiveWidth;
         opacity = 0;
-        zIndex = 0;
+        zIndex = 10; // Keep at 10 to prevent sudden disappearance during horizontal translation
         pointerEvents = 'none';
       } else {
         x = xOffset * 1.5;
         scale = 1;
-        cardWidth = inactiveWidth;
         opacity = 0;
-        zIndex = 0;
+        zIndex = 10; // Keep at 10 to prevent sudden disappearance during horizontal translation
         pointerEvents = 'none';
       }
 
-      // Animate card container position, width and scale smoothly
+      // Animate card container position/scale smoothly
       gsap.to(slideElement, {
         xPercent: -50,
         yPercent: -50,
         x: x,
-        width: cardWidth,
         scale: scale,
         opacity: opacity,
         zIndex: zIndex,
@@ -155,7 +151,7 @@ const HeroCarousel = () => {
 
           // Pop up slide text smoothly in stagger sequence every time a slide is active (slightly slower)
           if (heading) {
-            gsap.fromTo(heading, 
+            gsap.fromTo(heading,
               { y: 30, opacity: 0 },
               { y: 0, opacity: 1, duration: 1.0, ease: "power3.out", delay: 0.4 }
             );
@@ -242,15 +238,17 @@ const HeroCarousel = () => {
     const isMobile = windowWidth <= 768;
     const isTablet = windowWidth > 768 && windowWidth <= 1024;
 
-    const activeWidth = isMobile ? 300 : (isTablet ? 600 : 1200);
-    const inactiveWidth = isMobile ? 80 : (isTablet ? 150 : 300);
-    const gap = isMobile ? 10 : (isTablet ? 20 : 30);
-    const xOffset = (activeWidth / 2) + gap + (inactiveWidth / 2);
+    // Calculate offsets based on screen size (card width + gap)
+    let xOffset = 1350; // 1300 width + 50 gap (slightly increased)
+    if (isMobile) {
+      xOffset = 370;
+    } else if (isTablet) {
+      xOffset = 630;
+    }
 
     const total = extendedSlides.length;
     let x = 0;
     let scale = 1;
-    let cardWidth = inactiveWidth;
     let opacity = 0;
     let zIndex = 0;
 
@@ -262,33 +260,28 @@ const HeroCarousel = () => {
       if (wrappedDiff === 0) {
         x = 0;
         scale = 1;
-        cardWidth = activeWidth;
         opacity = 1;
         zIndex = 20;
       } else if (wrappedDiff === -1) {
         x = -xOffset;
         scale = 1;
-        cardWidth = inactiveWidth;
         opacity = 1;
         zIndex = 10;
       } else if (wrappedDiff === 1) {
         x = xOffset;
         scale = 1;
-        cardWidth = inactiveWidth;
         opacity = 1;
         zIndex = 10;
       } else if (wrappedDiff < -1) {
         x = -xOffset * 1.5;
         scale = 1;
-        cardWidth = inactiveWidth;
         opacity = 0;
-        zIndex = 0;
+        zIndex = 10; // Keep at 10 to prevent sudden disappearance during transition
       } else {
         x = xOffset * 1.5;
         scale = 1;
-        cardWidth = inactiveWidth;
         opacity = 0;
-        zIndex = 0;
+        zIndex = 10; // Keep at 10 to prevent sudden disappearance during transition
       }
     }
 
@@ -296,7 +289,6 @@ const HeroCarousel = () => {
       fontFamily: "'Albert Sans', sans-serif",
       boxSizing: 'border-box' as const,
       transform: `translate(calc(-50% + ${x}px), -50%) scale(${scale})`,
-      width: `${cardWidth}px`,
       opacity: opacity,
       zIndex: zIndex,
     };
@@ -382,10 +374,7 @@ const HeroCarousel = () => {
                 >
                   {/* Main Heading */}
                   <h2
-                    className={`font-normal mb-3 sm:mb-6 leading-tight ${index === activeIndexMod
-                      ? 'text-[28px] sm:text-[40px] lg:text-[56px]'
-                      : 'text-[20px] sm:text-[30px] lg:text-[40px]'
-                      }`}
+                    className="font-normal mb-3 sm:mb-6 leading-tight text-[28px] sm:text-[40px] lg:text-[56px]"
                     style={{
                       color: slide.textColor || '#000000',
                       opacity: 0
@@ -401,10 +390,7 @@ const HeroCarousel = () => {
 
                   {/* Subheading */}
                   <p
-                    className={`mb-3 sm:mb-6 max-w-xs sm:max-w-md ${index === activeIndexMod
-                      ? 'text-[12px] sm:text-[16px] lg:text-[20px]'
-                      : 'text-[10px] sm:text-[14px] lg:text-[16px]'
-                      }`}
+                    className="mb-3 sm:mb-6 max-w-xs sm:max-w-md text-[12px] sm:text-[16px] lg:text-[20px]"
                     style={{
                       color: slide.textColor || '#000000',
                       opacity: 0
