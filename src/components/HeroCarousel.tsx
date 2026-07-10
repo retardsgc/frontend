@@ -8,7 +8,7 @@ import { getImageUrl } from '../utils/imageUrl';
 
 const HeroCarousel = () => {
   const [slides, setSlides] = useState<any[]>(staticConfig.hero?.slides || []);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(300);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const slidesRef = useRef<any[]>([]);
   const contentRef = useRef<any[]>([]);
@@ -17,6 +17,16 @@ const HeroCarousel = () => {
 
   const slideDirection = useRef<'next' | 'prev'>('next');
   const prevActiveIndexRef = useRef<number | null>(null);
+
+  // Generate an extended slide list to support smooth loop transitions without wrapping gaps
+  const extendedSlides = React.useMemo(() => {
+    if (slides.length === 0) return [];
+    let list = [...slides];
+    while (list.length < 6) {
+      list = [...list, ...slides];
+    }
+    return list;
+  }, [slides]);
 
   // GSAP Timeline for animations
   const tl = useRef<any>(null);
@@ -36,6 +46,7 @@ const HeroCarousel = () => {
       .then(config => {
         if (config.slides && Array.isArray(config.slides)) {
           setSlides(config.slides);
+          setActiveIndex(config.slides.length * 100);
         }
       })
       .catch(() => { });
@@ -47,7 +58,7 @@ const HeroCarousel = () => {
 
     // Animate active slide content
     animateActiveSlide();
-  }, [activeIndex, windowWidth, slides.length]); // Re-run when slides length updates
+  }, [activeIndex, windowWidth, extendedSlides.length]); // Re-run when slides length updates
 
   const animateActiveSlide = () => {
     if (tl.current) {
@@ -65,19 +76,17 @@ const HeroCarousel = () => {
       xOffset = 590;
     }
 
-    const total = slides.length;
+    const total = extendedSlides.length;
     if (total === 0) return;
 
-    const prevActiveIndex = prevActiveIndexRef.current;
-
-    slides.forEach((_, index) => {
+    extendedSlides.forEach((_, index) => {
       const slideElement = slidesRef.current[index];
       if (!slideElement) return;
 
-      // Calculate circular distance between this slide index and the active index
-      let diff = index - activeIndex;
-      if (diff > total / 2) diff -= total;
-      if (diff < -total / 2) diff += total;
+      // Calculate circular distance between this slide index and the active index Mod total
+      const activeIndexMod = activeIndex % total;
+      let diff = index - activeIndexMod;
+      let wrappedDiff = ((diff + total / 2) % total + total) % total - total / 2;
 
       let x = 0;
       let scale = 0.8;
@@ -85,25 +94,25 @@ const HeroCarousel = () => {
       let zIndex = 0;
       let pointerEvents = 'none';
 
-      if (diff === 0) {
+      if (wrappedDiff === 0) {
         x = 0;
         scale = 1;
         opacity = 1;
         zIndex = 20;
         pointerEvents = 'auto';
-      } else if (diff === -1) {
+      } else if (wrappedDiff === -1) {
         x = -xOffset;
         scale = 0.9;
         opacity = 0.4;
         zIndex = 10;
         pointerEvents = 'auto';
-      } else if (diff === 1) {
+      } else if (wrappedDiff === 1) {
         x = xOffset;
         scale = 0.9;
         opacity = 0.4;
         zIndex = 10;
         pointerEvents = 'auto';
-      } else if (diff < -1) {
+      } else if (wrappedDiff < -1) {
         x = -xOffset * 1.5;
         scale = 0.8;
         opacity = 0;
@@ -117,78 +126,24 @@ const HeroCarousel = () => {
         pointerEvents = 'none';
       }
 
-      // Check if this slide needs to wrap around the carousel edges
-      let isWrapping = false;
-      if (prevActiveIndex !== null && total > 2) {
-        const oldPrev = (prevActiveIndex - 1 + total) % total;
-        const oldNext = (prevActiveIndex + 1) % total;
-
-        // Moving forward: slide that was on the left wraps to become the new right slide
-        if (index === oldPrev && diff === 1) {
-          isWrapping = true;
-          gsap.killTweensOf(slideElement);
-          gsap.to(slideElement, {
-            x: -xOffset * 1.3,
-            opacity: 0,
-            scale: 0.8,
-            duration: 0.35,
-            ease: "power2.in",
-            onComplete: () => {
-              gsap.set(slideElement, { x: xOffset * 1.3, zIndex: 10, xPercent: -50, yPercent: -50 });
-              gsap.to(slideElement, {
-                x: xOffset,
-                scale: 0.9,
-                opacity: 0.4,
-                duration: 0.45,
-                ease: "power2.out"
-              });
-            }
-          });
-        }
-        // Moving backward: slide that was on the right wraps to become the new left slide
-        else if (index === oldNext && diff === -1) {
-          isWrapping = true;
-          gsap.killTweensOf(slideElement);
-          gsap.to(slideElement, {
-            x: xOffset * 1.3,
-            opacity: 0,
-            scale: 0.8,
-            duration: 0.35,
-            ease: "power2.in",
-            onComplete: () => {
-              gsap.set(slideElement, { x: -xOffset * 1.3, zIndex: 10, xPercent: -50, yPercent: -50 });
-              gsap.to(slideElement, {
-                x: -xOffset,
-                scale: 0.9,
-                opacity: 0.4,
-                duration: 0.45,
-                ease: "power2.out"
-              });
-            }
-          });
-        }
-      }
-
-      if (!isWrapping) {
-        // Animate card container position/scale smoothly
-        gsap.to(slideElement, {
-          xPercent: -50,
-          yPercent: -50,
-          x: x,
-          scale: scale,
-          opacity: opacity,
-          zIndex: zIndex,
-          pointerEvents: pointerEvents,
-          duration: 0.8,
-          ease: "power2.inOut" // Premium smooth transition curve
-        });
-      }
+      // Animate card container position/scale smoothly
+      gsap.to(slideElement, {
+        xPercent: -50,
+        yPercent: -50,
+        x: x,
+        scale: scale,
+        opacity: opacity,
+        zIndex: zIndex,
+        pointerEvents: pointerEvents,
+        duration: 0.8,
+        ease: "power2.inOut" // Premium smooth transition curve
+      });
 
       // Animate content elements
       const content = contentRef.current[index];
       const image = imageRef.current[index];
 
-      if (index === activeIndex) {
+      if (index === activeIndexMod) {
         if (content) {
           const heading = content.querySelector('h2');
           const subheading = content.querySelector('p');
@@ -196,7 +151,7 @@ const HeroCarousel = () => {
 
           // Pop up slide text smoothly in stagger sequence every time a slide is active
           if (heading) {
-            gsap.fromTo(heading,
+            gsap.fromTo(heading, 
               { y: 30, opacity: 0 },
               { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.3 }
             );
@@ -233,13 +188,20 @@ const HeroCarousel = () => {
           }
         }
       } else {
-        // Clear content animations for inactive slides to keep them clean
+        // Fade out content elements smoothly for inactive slides
         if (content) {
           const heading = content.querySelector('h2');
           const subheading = content.querySelector('p');
           const button = content.querySelector('a');
 
-          gsap.set([heading, subheading, button], { opacity: 0, y: 0 });
+          gsap.to([heading, subheading, button], {
+            opacity: 0,
+            duration: 0.3,
+            ease: "power2.out",
+            onComplete: () => {
+              gsap.set([heading, subheading, button], { y: 0 });
+            }
+          });
         }
         if (image) {
           // Set to visible and centered for side previews
@@ -252,20 +214,24 @@ const HeroCarousel = () => {
   };
 
   const prevSlide = () => {
+    if (slides.length === 0) return;
     slideDirection.current = 'prev';
-    setActiveIndex((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+    setActiveIndex((prev) => prev - 1);
   };
 
   const nextSlide = () => {
+    if (slides.length === 0) return;
     slideDirection.current = 'next';
-    setActiveIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+    setActiveIndex((prev) => prev + 1);
   };
 
   const getSlideClass = (index) => {
+    const total = extendedSlides.length;
+    const activeIndexMod = total > 0 ? activeIndex % total : 0;
     const baseClass = "absolute flex flex-col items-center justify-center bg-transparent rounded-2xl left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden";
-    const sizeClass = index === activeIndex ? "carousel-card-active" : "carousel-card-inactive";
+    const sizeClass = index === activeIndexMod ? "carousel-card-active" : "carousel-card-inactive";
 
-    if (index === activeIndex) {
+    if (index === activeIndexMod) {
       return `${baseClass} ${sizeClass} z-20`;
     } else {
       return `${baseClass} ${sizeClass} z-10`;
@@ -284,33 +250,33 @@ const HeroCarousel = () => {
       xOffset = 590;
     }
 
-    const total = slides.length;
+    const total = extendedSlides.length;
     let x = 0;
     let scale = 0.8;
     let opacity = 0;
     let zIndex = 0;
 
     if (total > 0) {
-      let diff = index - activeIndex;
-      if (diff > total / 2) diff -= total;
-      if (diff < -total / 2) diff += total;
+      const activeIndexMod = activeIndex % total;
+      let diff = index - activeIndexMod;
+      let wrappedDiff = ((diff + total / 2) % total + total) % total - total / 2;
 
-      if (diff === 0) {
+      if (wrappedDiff === 0) {
         x = 0;
         scale = 1;
         opacity = 1;
         zIndex = 20;
-      } else if (diff === -1) {
+      } else if (wrappedDiff === -1) {
         x = -xOffset;
         scale = 0.9;
         opacity = 0.4;
         zIndex = 10;
-      } else if (diff === 1) {
+      } else if (wrappedDiff === 1) {
         x = xOffset;
         scale = 0.9;
         opacity = 0.4;
         zIndex = 10;
-      } else if (diff < -1) {
+      } else if (wrappedDiff < -1) {
         x = -xOffset * 1.5;
         scale = 0.8;
         opacity = 0;
@@ -371,13 +337,15 @@ const HeroCarousel = () => {
         className="flex items-center justify-center relative w-full overflow-hidden px-4 sm:px-8"
         style={{ height: getContainerHeight() }}
       >
-        {slides.length === 0 ? (
+        {extendedSlides.length === 0 ? (
           <div className="relative flex flex-col items-center justify-center bg-[#f5f5f7] rounded-2xl min-h-[400px] w-full max-w-4xl">
             <p className="text-gray-500 text-lg">Loading slides...</p>
           </div>
         ) : (
-          slides.map((slide, index) => {
+          extendedSlides.map((slide, index) => {
             const imageUrl = slide.image ? getImageUrl(slide.image) : null;
+            const total = extendedSlides.length;
+            const activeIndexMod = total > 0 ? activeIndex % total : 0;
 
             return (
               <div
@@ -410,13 +378,13 @@ const HeroCarousel = () => {
                 >
                   {/* Main Heading */}
                   <h2
-                    className={`font-normal mb-3 sm:mb-6 leading-tight ${index === activeIndex
+                    className={`font-normal mb-3 sm:mb-6 leading-tight ${index === activeIndexMod
                       ? 'text-[28px] sm:text-[40px] lg:text-[56px]'
                       : 'text-[20px] sm:text-[30px] lg:text-[40px]'
                       }`}
-                    style={{
-                      color: slide.textColor || '#000000',
-                      opacity: 0
+                    style={{ 
+                      color: slide.textColor || '#000000', 
+                      opacity: 0 
                     }}
                   >
                     {slide.heading.split('\n').map((line, lineIndex) => (
@@ -429,7 +397,7 @@ const HeroCarousel = () => {
 
                   {/* Subheading */}
                   <p
-                    className={`mb-3 sm:mb-6 max-w-xs sm:max-w-md ${index === activeIndex
+                    className={`mb-3 sm:mb-6 max-w-xs sm:max-w-md ${index === activeIndexMod
                       ? 'text-[12px] sm:text-[16px] lg:text-[20px]'
                       : 'text-[10px] sm:text-[14px] lg:text-[16px]'
                       }`}
