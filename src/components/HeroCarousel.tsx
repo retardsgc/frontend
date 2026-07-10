@@ -68,13 +68,10 @@ const HeroCarousel = () => {
     const isMobile = windowWidth <= 768;
     const isTablet = windowWidth > 768 && windowWidth <= 1024;
 
-    // Calculate offsets based on screen size
-    let xOffset = 1265;
-    if (isMobile) {
-      xOffset = 350;
-    } else if (isTablet) {
-      xOffset = 590;
-    }
+    const activeWidth = isMobile ? 300 : (isTablet ? 600 : 1200);
+    const inactiveWidth = isMobile ? 80 : (isTablet ? 150 : 300);
+    const gap = isMobile ? 10 : (isTablet ? 20 : 30);
+    const xOffset = (activeWidth / 2) + gap + (inactiveWidth / 2);
 
     const total = extendedSlides.length;
     if (total === 0) return;
@@ -89,7 +86,8 @@ const HeroCarousel = () => {
       let wrappedDiff = ((diff + total / 2) % total + total) % total - total / 2;
 
       let x = 0;
-      let scale = 0.8;
+      let scale = 1;
+      let cardWidth = inactiveWidth;
       let opacity = 0;
       let zIndex = 0;
       let pointerEvents = 'none';
@@ -97,40 +95,46 @@ const HeroCarousel = () => {
       if (wrappedDiff === 0) {
         x = 0;
         scale = 1;
+        cardWidth = activeWidth;
         opacity = 1;
         zIndex = 20;
         pointerEvents = 'auto';
       } else if (wrappedDiff === -1) {
         x = -xOffset;
         scale = 1;
+        cardWidth = inactiveWidth;
         opacity = 1;
         zIndex = 10;
         pointerEvents = 'auto';
       } else if (wrappedDiff === 1) {
         x = xOffset;
         scale = 1;
+        cardWidth = inactiveWidth;
         opacity = 1;
         zIndex = 10;
         pointerEvents = 'auto';
       } else if (wrappedDiff < -1) {
         x = -xOffset * 1.5;
-        scale = 0.8;
+        scale = 1;
+        cardWidth = inactiveWidth;
         opacity = 0;
         zIndex = 0;
         pointerEvents = 'none';
       } else {
         x = xOffset * 1.5;
-        scale = 0.8;
+        scale = 1;
+        cardWidth = inactiveWidth;
         opacity = 0;
         zIndex = 0;
         pointerEvents = 'none';
       }
 
-      // Animate card container position/scale smoothly
+      // Animate card container position, width and scale smoothly
       gsap.to(slideElement, {
         xPercent: -50,
         yPercent: -50,
         x: x,
+        width: cardWidth,
         scale: scale,
         opacity: opacity,
         zIndex: zIndex,
@@ -179,12 +183,8 @@ const HeroCarousel = () => {
               { opacity: 1, duration: 1.0, ease: "power3.out" }
             );
           } else {
-            // Slide image in from left/right depending on navigation direction
-            const startX = slideDirection.current === 'next' ? 120 : -120;
-            gsap.fromTo(image,
-              { x: startX, opacity: 0 },
-              { x: 0, opacity: 1, duration: 1.0, ease: "power3.out", delay: 0.1 }
-            );
+            // Keep the image fully visible and let it slide/resize naturally with the card container (no blinking!)
+            gsap.set(image, { opacity: 1, x: 0 });
           }
         }
       } else {
@@ -242,17 +242,15 @@ const HeroCarousel = () => {
     const isMobile = windowWidth <= 768;
     const isTablet = windowWidth > 768 && windowWidth <= 1024;
 
-    // Calculate offsets based on screen size
-    let xOffset = 1265;
-    if (isMobile) {
-      xOffset = 350;
-    } else if (isTablet) {
-      xOffset = 590;
-    }
+    const activeWidth = isMobile ? 300 : (isTablet ? 600 : 1200);
+    const inactiveWidth = isMobile ? 80 : (isTablet ? 150 : 300);
+    const gap = isMobile ? 10 : (isTablet ? 20 : 30);
+    const xOffset = (activeWidth / 2) + gap + (inactiveWidth / 2);
 
     const total = extendedSlides.length;
     let x = 0;
-    let scale = 0.8;
+    let scale = 1;
+    let cardWidth = inactiveWidth;
     let opacity = 0;
     let zIndex = 0;
 
@@ -264,26 +262,31 @@ const HeroCarousel = () => {
       if (wrappedDiff === 0) {
         x = 0;
         scale = 1;
+        cardWidth = activeWidth;
         opacity = 1;
         zIndex = 20;
       } else if (wrappedDiff === -1) {
         x = -xOffset;
         scale = 1;
+        cardWidth = inactiveWidth;
         opacity = 1;
         zIndex = 10;
       } else if (wrappedDiff === 1) {
         x = xOffset;
         scale = 1;
+        cardWidth = inactiveWidth;
         opacity = 1;
         zIndex = 10;
       } else if (wrappedDiff < -1) {
         x = -xOffset * 1.5;
-        scale = 0.8;
+        scale = 1;
+        cardWidth = inactiveWidth;
         opacity = 0;
         zIndex = 0;
       } else {
         x = xOffset * 1.5;
-        scale = 0.8;
+        scale = 1;
+        cardWidth = inactiveWidth;
         opacity = 0;
         zIndex = 0;
       }
@@ -293,6 +296,7 @@ const HeroCarousel = () => {
       fontFamily: "'Albert Sans', sans-serif",
       boxSizing: 'border-box' as const,
       transform: `translate(calc(-50% + ${x}px), -50%) scale(${scale})`,
+      width: `${cardWidth}px`,
       opacity: opacity,
       zIndex: zIndex,
     };
@@ -382,9 +386,9 @@ const HeroCarousel = () => {
                       ? 'text-[28px] sm:text-[40px] lg:text-[56px]'
                       : 'text-[20px] sm:text-[30px] lg:text-[40px]'
                       }`}
-                    style={{ 
-                      color: slide.textColor || '#000000', 
-                      opacity: 0 
+                    style={{
+                      color: slide.textColor || '#000000',
+                      opacity: 0
                     }}
                   >
                     {slide.heading.split('\n').map((line, lineIndex) => (

@@ -55,40 +55,28 @@ html, body {
 
 /* Custom carousel card sizes */
 .carousel-card-active {
-  width: 1300px !important;
   height: 740px !important;
-  min-width: 1300px !important;
   min-height: 740px !important;
-  max-width: 1300px !important;
   max-height: 740px !important;
 }
 
 .carousel-card-inactive {
-  width: 1300px !important;
   height: 740px !important;
-  min-width: 1300px !important;
   min-height: 740px !important;
-  max-width: 1300px !important;
   max-height: 740px !important;
 }
 
 /* Mobile responsive card sizes */
 @media (max-width: 768px) {
   .carousel-card-active {
-    width: 350px !important;
     height: 500px !important;
-    min-width: 350px !important;
     min-height: 500px !important;
-    max-width: 350px !important;
     max-height: 500px !important;
   }
 
   .carousel-card-inactive {
-    width: 350px !important;
     height: 500px !important;
-    min-width: 350px !important;
     min-height: 500px !important;
-    max-width: 350px !important;
     max-height: 500px !important;
   }
 }
@@ -96,20 +84,14 @@ html, body {
 /* Tablet responsive card sizes */
 @media (min-width: 769px) and (max-width: 1024px) {
   .carousel-card-active {
-    width: 600px !important;
     height: 600px !important;
-    min-width: 600px !important;
     min-height: 600px !important;
-    max-width: 600px !important;
     max-height: 600px !important;
   }
 
   .carousel-card-inactive {
-    width: 600px !important;
     height: 600px !important;
-    min-width: 600px !important;
     min-height: 600px !important;
-    max-width: 600px !important;
     max-height: 600px !important;
   }
 }
