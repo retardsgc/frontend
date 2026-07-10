@@ -196,7 +196,7 @@ const HeroCarousel = () => {
 
           // Pop up slide text smoothly in stagger sequence every time a slide is active
           if (heading) {
-            gsap.fromTo(heading, 
+            gsap.fromTo(heading,
               { y: 30, opacity: 0 },
               { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.3 }
             );
@@ -210,7 +210,7 @@ const HeroCarousel = () => {
           if (button) {
             gsap.fromTo(button,
               { y: 15, opacity: 0 },
-              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.6 }
+              { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.45 }
             );
           }
         }
@@ -411,12 +411,12 @@ const HeroCarousel = () => {
                   {/* Main Heading */}
                   <h2
                     className={`font-normal mb-3 sm:mb-6 leading-tight ${index === activeIndex
-                        ? 'text-[28px] sm:text-[40px] lg:text-[56px]'
-                        : 'text-[20px] sm:text-[30px] lg:text-[40px]'
+                      ? 'text-[28px] sm:text-[40px] lg:text-[56px]'
+                      : 'text-[20px] sm:text-[30px] lg:text-[40px]'
                       }`}
-                    style={{ 
-                      color: slide.textColor || '#000000', 
-                      opacity: 0 
+                    style={{
+                      color: slide.textColor || '#000000',
+                      opacity: 0
                     }}
                   >
                     {slide.heading.split('\n').map((line, lineIndex) => (
@@ -430,12 +430,12 @@ const HeroCarousel = () => {
                   {/* Subheading */}
                   <p
                     className={`mb-3 sm:mb-6 max-w-xs sm:max-w-md ${index === activeIndex
-                        ? 'text-[12px] sm:text-[16px] lg:text-[20px]'
-                        : 'text-[10px] sm:text-[14px] lg:text-[16px]'
+                      ? 'text-[12px] sm:text-[16px] lg:text-[20px]'
+                      : 'text-[10px] sm:text-[14px] lg:text-[16px]'
                       }`}
-                    style={{ 
-                      color: slide.textColor || '#000000', 
-                      opacity: 0 
+                    style={{
+                      color: slide.textColor || '#000000',
+                      opacity: 0
                     }}
                   >
                     {slide.subheading}
@@ -450,7 +450,7 @@ const HeroCarousel = () => {
                       color: slide.textColor || '#000000',
                       opacity: 0
                     }}
-                    className="inline-flex items-center border-2 px-4 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-lg font-medium transition-all duration-300 hover:bg-black hover:!text-white group"
+                    className="inline-flex items-center border-2 px-4 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-lg font-medium transition-colors duration-300 hover:bg-black hover:!text-white group"
                   >
                     {slide.button}
                     <svg
