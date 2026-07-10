@@ -127,7 +127,7 @@ const HeroCarousel = () => {
         pointerEvents = 'none';
       }
 
-      // Animate card container position/scale smoothly
+      // Animate card container position/scale smoothly (slowed down to 1.6s)
       gsap.to(slideElement, {
         xPercent: -50,
         yPercent: -50,
@@ -136,7 +136,7 @@ const HeroCarousel = () => {
         opacity: opacity,
         zIndex: zIndex,
         pointerEvents: pointerEvents,
-        duration: 0.8,
+        duration: 1.6,
         ease: "power2.inOut" // Premium smooth transition curve
       });
 
@@ -150,23 +150,23 @@ const HeroCarousel = () => {
           const subheading = content.querySelector('p');
           const button = content.querySelector('a');
 
-          // Pop up slide text smoothly in stagger sequence every time a slide is active (slightly slower)
+          // Pop up slide text smoothly in stagger sequence every time a slide is active (slowed stagger delays)
           if (heading) {
             gsap.fromTo(heading,
               { y: 30, opacity: 0 },
-              { y: 0, opacity: 1, duration: 1.0, ease: "power3.out", delay: 0.4 }
+              { y: 0, opacity: 1, duration: 1.2, ease: "power3.out", delay: 0.6 }
             );
           }
           if (subheading) {
             gsap.fromTo(subheading,
               { y: 20, opacity: 0 },
-              { y: 0, opacity: 1, duration: 1.0, ease: "power3.out", delay: 0.6 }
+              { y: 0, opacity: 1, duration: 1.2, ease: "power3.out", delay: 0.9 }
             );
           }
           if (button) {
             gsap.fromTo(button,
               { y: 15, opacity: 0 },
-              { y: 0, opacity: 1, duration: 1.0, ease: "power3.out", delay: 0.75 }
+              { y: 0, opacity: 1, duration: 1.2, ease: "power3.out", delay: 1.2 }
             );
           }
         }
@@ -193,7 +193,7 @@ const HeroCarousel = () => {
 
           gsap.to([heading, subheading, button], {
             opacity: 0,
-            duration: 0.8, // Match the slide transition duration so text goes with the slide
+            duration: 1.6, // Match the slowed slide transition duration so text goes with the slide
             ease: "power2.inOut",
             onComplete: () => {
               gsap.set([heading, subheading, button], { y: 0 });
