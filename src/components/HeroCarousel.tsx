@@ -227,6 +227,85 @@ const HeroCarousel = () => {
     setActiveIndex((prev) => prev + 1);
   };
 
+  // Helper function to update slide positions in real-time as the user drags
+  const updateSlidePositionsDuringDrag = (diffX: number) => {
+    const isMobile = windowWidth <= 768;
+    const isTablet = windowWidth > 768 && windowWidth <= 1024;
+
+    let xOffset = 1350;
+    if (isMobile) {
+      xOffset = 370;
+    } else if (isTablet) {
+      xOffset = 630;
+    }
+
+    const total = extendedSlides.length;
+    if (total === 0) return;
+
+    extendedSlides.forEach((_, index) => {
+      const slideElement = slidesRef.current[index];
+      if (!slideElement) return;
+
+      const activeIndexMod = activeIndex % total;
+      let diff = index - activeIndexMod;
+      let wrappedDiff = ((diff + total / 2) % total + total) % total - total / 2;
+
+      let x = 0;
+      let scale = 1;
+      let opacity = 0;
+      let zIndex = 0;
+
+      if (wrappedDiff === 0) {
+        x = 0;
+        scale = 1;
+        opacity = 1;
+        zIndex = 20;
+      } else if (wrappedDiff === -1) {
+        x = -xOffset;
+        scale = 1;
+        opacity = 1;
+        zIndex = 10;
+      } else if (wrappedDiff === 1) {
+        x = xOffset;
+        scale = 1;
+        opacity = 1;
+        zIndex = 10;
+      } else if (wrappedDiff < -1) {
+        x = -xOffset * 2;
+        scale = 1;
+        opacity = 0;
+        zIndex = 10;
+      } else {
+        x = xOffset * 2;
+        scale = 1;
+        opacity = 0;
+        zIndex = 10;
+      }
+
+      // Dynamically adjust opacity when dragging off-screen slides into viewport bounds
+      let dragOpacity = opacity;
+      if (wrappedDiff === -1 || wrappedDiff === 1 || wrappedDiff === 0) {
+        dragOpacity = 1;
+      } else {
+        const distanceFromCenter = Math.abs(x + diffX);
+        if (distanceFromCenter < xOffset) {
+          dragOpacity = 1 - (distanceFromCenter / xOffset);
+        } else {
+          dragOpacity = 0;
+        }
+      }
+
+      gsap.set(slideElement, {
+        xPercent: -50,
+        yPercent: -50,
+        x: x + diffX,
+        scale: scale,
+        opacity: dragOpacity,
+        zIndex: zIndex
+      });
+    });
+  };
+
   // Swipe event handlers (two-finger support)
   const handleTouchStart = (e: React.TouchEvent) => {
     // Track the swipe gesture specifically when exactly two fingers are placed on the screen
@@ -239,30 +318,39 @@ const HeroCarousel = () => {
   const handleTouchMove = (e: React.TouchEvent) => {
     if (touchStartX.current === null || touchStartY.current === null) return;
 
-    // Trigger swiping specifically when exactly two fingers are moving together
+    // Move slides in real-time specifically when exactly two fingers are moving together
     if (e.touches.length === 2) {
       const currentX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-      const currentY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-
       const diffX = currentX - touchStartX.current;
-      const diffY = currentY - touchStartY.current;
-
-      // Displacement threshold of 50px
-      if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
-        if (diffX > 0) {
-          prevSlide();
-        } else {
-          nextSlide();
-        }
-        // Clear tracking positions so it only triggers once per gesture
-        touchStartX.current = null;
-        touchStartY.current = null;
-      }
+      updateSlidePositionsDuringDrag(diffX);
     }
   };
 
-  const handleTouchEnd = () => {
-    // Clear tracking coordinates on touch release
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+
+    let endX = touchStartX.current;
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      if (e.changedTouches.length === 2) {
+        endX = (e.changedTouches[0].clientX + e.changedTouches[1].clientX) / 2;
+      } else {
+        endX = e.changedTouches[0].clientX;
+      }
+    }
+    const diffX = endX - touchStartX.current;
+
+    // Threshold of 150px to trigger next/prev transition, otherwise snaps back smoothly
+    if (Math.abs(diffX) > 150) {
+      if (diffX > 0) {
+        prevSlide();
+      } else {
+        nextSlide();
+      }
+    } else {
+      // Snap back smoothly to original positions
+      animateActiveSlide();
+    }
+
     touchStartX.current = null;
     touchStartY.current = null;
   };
@@ -274,24 +362,37 @@ const HeroCarousel = () => {
     isDragging.current = true;
   };
 
-  const handleMouseUp = (e: React.MouseEvent) => {
-    if (!isDragging.current || touchStartX.current === null || touchStartY.current === null) return;
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current || touchStartX.current === null) return;
     const diffX = e.clientX - touchStartX.current;
-    const diffY = e.clientY - touchStartY.current;
+    updateSlidePositionsDuringDrag(diffX);
+  };
 
-    if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isDragging.current || touchStartX.current === null) return;
+    const diffX = e.clientX - touchStartX.current;
+
+    if (Math.abs(diffX) > 150) {
       if (diffX > 0) {
         prevSlide();
       } else {
         nextSlide();
       }
+    } else {
+      // Snap back smoothly
+      animateActiveSlide();
     }
+
     touchStartX.current = null;
     touchStartY.current = null;
     isDragging.current = false;
   };
 
   const handleMouseLeave = () => {
+    if (isDragging.current && touchStartX.current !== null) {
+      // Snap back smoothly if mouse leaves drag area
+      animateActiveSlide();
+    }
     touchStartX.current = null;
     touchStartY.current = null;
     isDragging.current = false;
