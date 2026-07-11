@@ -19,6 +19,11 @@ const HeroCarousel = () => {
   const prevActiveIndexRef = useRef<number | null>(null);
   const initialActiveIndexRef = useRef<number | null>(null);
 
+  // Gesture swipe tracking state refs
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const isDragging = useRef<boolean>(false);
+
   // Generate an extended slide list to support smooth loop transitions without wrapping gaps
   const extendedSlides = React.useMemo(() => {
     if (slides.length === 0) return [];
@@ -222,6 +227,59 @@ const HeroCarousel = () => {
     setActiveIndex((prev) => prev + 1);
   };
 
+  // Swipe event handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const diffX = e.changedTouches[0].clientX - touchStartX.current;
+    const diffY = e.changedTouches[0].clientY - touchStartY.current;
+
+    // Minimum displacement of 50px is needed to trigger, and horizontal component must be larger
+    if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX > 0) {
+        prevSlide();
+      } else {
+        nextSlide();
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return; // Only trigger for left-clicks
+    touchStartX.current = e.clientX;
+    touchStartY.current = e.clientY;
+    isDragging.current = true;
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isDragging.current || touchStartX.current === null || touchStartY.current === null) return;
+    const diffX = e.clientX - touchStartX.current;
+    const diffY = e.clientY - touchStartY.current;
+
+    if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX > 0) {
+        prevSlide();
+      } else {
+        nextSlide();
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isDragging.current = false;
+  };
+
+  const handleMouseLeave = () => {
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isDragging.current = false;
+  };
+
   const getSlideClass = (index) => {
     const total = extendedSlides.length;
     const activeIndexMod = total > 0 ? activeIndex % total : 0;
@@ -335,8 +393,13 @@ const HeroCarousel = () => {
 
       {/* Slides Container */}
       <div
-        className="flex items-center justify-center relative w-full overflow-hidden px-4 sm:px-8"
+        className="flex items-center justify-center relative w-full overflow-hidden px-4 sm:px-8 cursor-grab active:cursor-grabbing select-none"
         style={{ height: getContainerHeight() }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
       >
         {extendedSlides.length === 0 ? (
           <div className="relative flex flex-col items-center justify-center bg-[#f5f5f7] rounded-2xl min-h-[400px] w-full max-w-4xl">
