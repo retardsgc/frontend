@@ -227,25 +227,42 @@ const HeroCarousel = () => {
     setActiveIndex((prev) => prev + 1);
   };
 
-  // Swipe event handlers
+  // Swipe event handlers (two-finger support)
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
+    // Track the swipe gesture specifically when exactly two fingers are placed on the screen
+    if (e.touches.length === 2) {
+      touchStartX.current = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      touchStartY.current = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    }
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
+  const handleTouchMove = (e: React.TouchEvent) => {
     if (touchStartX.current === null || touchStartY.current === null) return;
-    const diffX = e.changedTouches[0].clientX - touchStartX.current;
-    const diffY = e.changedTouches[0].clientY - touchStartY.current;
 
-    // Minimum displacement of 50px is needed to trigger, and horizontal component must be larger
-    if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
-      if (diffX > 0) {
-        prevSlide();
-      } else {
-        nextSlide();
+    // Trigger swiping specifically when exactly two fingers are moving together
+    if (e.touches.length === 2) {
+      const currentX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const currentY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+      const diffX = currentX - touchStartX.current;
+      const diffY = currentY - touchStartY.current;
+
+      // Displacement threshold of 50px
+      if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX > 0) {
+          prevSlide();
+        } else {
+          nextSlide();
+        }
+        // Clear tracking positions so it only triggers once per gesture
+        touchStartX.current = null;
+        touchStartY.current = null;
       }
     }
+  };
+
+  const handleTouchEnd = () => {
+    // Clear tracking coordinates on touch release
     touchStartX.current = null;
     touchStartY.current = null;
   };
@@ -396,6 +413,7 @@ const HeroCarousel = () => {
         className="flex items-center justify-center relative w-full overflow-hidden px-4 sm:px-8 cursor-grab active:cursor-grabbing select-none"
         style={{ height: getContainerHeight() }}
         onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
