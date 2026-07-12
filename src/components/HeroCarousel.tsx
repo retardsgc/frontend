@@ -8,15 +8,34 @@ import { getImageUrl } from '../utils/imageUrl';
 
 const HeroCarousel = () => {
   const [slides, setSlides] = useState<any[]>(staticConfig.hero?.slides || []);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(300);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
-  const slidesRef = useRef([]);
-  const contentRef = useRef([]);
-  const imageRef = useRef([]);
+  const slidesRef = useRef<any[]>([]);
+  const contentRef = useRef<any[]>([]);
+  const imageRef = useRef<any[]>([]);
   const buttonRef = useRef(null);
 
+  const slideDirection = useRef<'next' | 'prev'>('next');
+  const prevActiveIndexRef = useRef<number | null>(null);
+  const initialActiveIndexRef = useRef<number | null>(null);
+
+  // Gesture swipe tracking state refs
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const isDragging = useRef<boolean>(false);
+
+  // Generate an extended slide list to support smooth loop transitions without wrapping gaps
+  const extendedSlides = React.useMemo(() => {
+    if (slides.length === 0) return [];
+    let list = [...slides];
+    while (list.length < 6) {
+      list = [...list, ...slides];
+    }
+    return list;
+  }, [slides]);
+
   // GSAP Timeline for animations
-  const tl = useRef(null);
+  const tl = useRef<any>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -26,146 +45,366 @@ const HeroCarousel = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  
+
   // Fetch hero slides from backend on mount
   useEffect(() => {
     siteConfigService.getHero()
       .then(config => {
         if (config.slides && Array.isArray(config.slides)) {
           setSlides(config.slides);
+          setActiveIndex(config.slides.length * 100);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
     // Initialize GSAP timeline
     tl.current = gsap.timeline();
-    
+
     // Animate active slide content
     animateActiveSlide();
-  }, [activeIndex, windowWidth]);
+  }, [activeIndex, windowWidth, extendedSlides.length]); // Re-run when slides length updates
 
   const animateActiveSlide = () => {
     if (tl.current) {
       tl.current.clear();
-      
-      // Get visible slides for current state
-      const visibleSlides = getVisibleSlides();
-      
-      // Animate slide cards with position transitions
-      visibleSlides.forEach(({ slide, index, position }) => {
-        const slideElement = slidesRef.current[index];
-        if (slideElement) {
-          if (index === activeIndex) {
-            // Active card: animate to center with full opacity and scale
-            gsap.to(slideElement, {
-              scale: 1,
-              opacity: 1,
-              duration: 0.8,
-              ease: "power2.out"
-            });
-          } else {
-            // Inactive cards: animate to side positions with reduced opacity and scale
-            gsap.to(slideElement, {
-              scale: 0.9,
-              opacity: 0.4,
-              duration: 0.8,
-              ease: "power2.out"
-            });
-          }
-        }
+    }
+
+    const isMobile = windowWidth <= 768;
+    const isTablet = windowWidth > 768 && windowWidth <= 1024;
+
+    // Calculate offsets based on screen size (card width + gap)
+    let xOffset = 1350; // 1300 width + 50 gap (slightly increased)
+    if (isMobile) {
+      xOffset = 370; // 350 width + 20 gap
+    } else if (isTablet) {
+      xOffset = 630; // 600 width + 30 gap
+    }
+
+    const total = extendedSlides.length;
+    if (total === 0) return;
+
+    extendedSlides.forEach((_, index) => {
+      const slideElement = slidesRef.current[index];
+      if (!slideElement) return;
+
+      // Calculate circular distance between this slide index and the active index Mod total
+      const activeIndexMod = activeIndex % total;
+      let diff = index - activeIndexMod;
+      let wrappedDiff = ((diff + total / 2) % total + total) % total - total / 2;
+
+      let x = 0;
+      let scale = 1;
+      let opacity = 0;
+      let zIndex = 0;
+      let pointerEvents = 'none';
+
+      if (wrappedDiff === 0) {
+        x = 0;
+        scale = 1;
+        opacity = 1;
+        zIndex = 20;
+        pointerEvents = 'auto';
+      } else if (wrappedDiff === -1) {
+        x = -xOffset;
+        scale = 1;
+        opacity = 1;
+        zIndex = 10;
+        pointerEvents = 'auto';
+      } else if (wrappedDiff === 1) {
+        x = xOffset;
+        scale = 1;
+        opacity = 1;
+        zIndex = 10;
+        pointerEvents = 'auto';
+      } else if (wrappedDiff < -1) {
+        x = -xOffset * 2;
+        scale = 1;
+        opacity = 0;
+        zIndex = 10; // Keep at 10 to prevent sudden disappearance during horizontal translation
+        pointerEvents = 'none';
+      } else {
+        x = xOffset * 2;
+        scale = 1;
+        opacity = 0;
+        zIndex = 10; // Keep at 10 to prevent sudden disappearance during horizontal translation
+        pointerEvents = 'none';
+      }
+
+      // Animate card container position/scale smoothly (synchronized to 1.2s duration)
+      gsap.to(slideElement, {
+        xPercent: -50,
+        yPercent: -50,
+        x: x,
+        scale: scale,
+        opacity: opacity,
+        zIndex: zIndex,
+        pointerEvents: pointerEvents,
+        duration: 1.2,
+        ease: "power2.inOut" // Premium smooth transition curve
       });
 
-      // Animate content elements for active slide
-      const activeContent = contentRef.current[activeIndex];
-      const activeImage = imageRef.current[activeIndex];
-      
-      if (activeContent) {
-        const heading = activeContent.querySelector('h2');
-        const subheading = activeContent.querySelector('p');
-        const button = activeContent.querySelector('button');
+      // Animate content elements
+      const content = contentRef.current[index];
+      const image = imageRef.current[index];
 
-        // Reset and animate heading
-        if (heading) {
-          gsap.fromTo(heading, 
-            { y: 40, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.8, ease: "power2.out", delay: 0.3 }
-          );
+      if (index === activeIndexMod) {
+        if (content) {
+          const heading = content.querySelector('h2');
+          const subheading = content.querySelector('p');
+          const button = content.querySelector('a');
+
+          // Pop up slide text smoothly in stagger sequence every time a slide is active
+          if (heading) {
+            gsap.fromTo(heading,
+              { y: 30, opacity: 0 },
+              { y: 0, opacity: 1, duration: 1.0, ease: "power3.out", delay: 0.4 }
+            );
+          }
+          if (subheading) {
+            gsap.fromTo(subheading,
+              { y: 20, opacity: 0 },
+              { y: 0, opacity: 1, duration: 1.0, ease: "power3.out", delay: 0.6 }
+            );
+          }
+          if (button) {
+            gsap.fromTo(button,
+              { y: 15, opacity: 0 },
+              { y: 0, opacity: 1, duration: 1.0, ease: "power3.out", delay: 0.8 }
+            );
+          }
         }
 
-        // Reset and animate subheading
-        if (subheading) {
-          gsap.fromTo(subheading,
-            { y: 30, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.8, ease: "power2.out", delay: 0.5 }
-          );
+        if (image) {
+          const isInitialLoad = prevActiveIndexRef.current === null;
+          if (isInitialLoad) {
+            // Fade in cleanly without sliding horizontally on initial page load
+            gsap.fromTo(image,
+              { opacity: 0 },
+              { opacity: 1, duration: 1.0, ease: "power3.out" }
+            );
+          } else {
+            // Keep the image fully visible and let it slide/resize naturally with the card container (no blinking!)
+            gsap.set(image, { opacity: 1, x: 0 });
+          }
         }
+      } else {
+        // Fade out content elements smoothly for inactive slides
+        if (content) {
+          const heading = content.querySelector('h2');
+          const subheading = content.querySelector('p');
+          const button = content.querySelector('a');
 
-        // Reset and animate button
-        if (button) {
-          gsap.fromTo(button,
-            { y: 20, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.8, ease: "power2.out", delay: 0.7 }
-          );
+          gsap.to([heading, subheading, button], {
+            opacity: 0,
+            duration: 1.2, // Match the slide transition duration so text goes with the slide
+            ease: "power2.inOut",
+            onComplete: () => {
+              gsap.set([heading, subheading, button], { y: 0 });
+            }
+          });
+        }
+        if (image) {
+          // Set to visible and centered for side previews
+          gsap.set(image, { opacity: 1, x: 0 });
         }
       }
+    });
 
-      // Animate image
-      if (activeImage) {
-        gsap.fromTo(activeImage,
-          { y: 30, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.8, ease: "power2.out", delay: 0.9 }
-        );
-      }
-    }
+    prevActiveIndexRef.current = activeIndex;
   };
 
   const prevSlide = () => {
-    // Add a smooth transition animation before changing slides
-    const visibleSlides = getVisibleSlides();
-    const visibleElements = visibleSlides.map(({ index }) => slidesRef.current[index]).filter(Boolean);
-    
-    gsap.to(visibleElements, {
-      x: 20,
-      duration: 0.15,
-      ease: "power2.out",
-      onComplete: () => {
-        setActiveIndex((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-        gsap.to(visibleElements, {
-          x: 0,
-          duration: 0.15,
-          ease: "power2.out"
-        });
-      }
-    });
+    if (slides.length === 0) return;
+    slideDirection.current = 'prev';
+    setActiveIndex((prev) => prev - 1);
   };
 
   const nextSlide = () => {
-    // Add a smooth transition animation before changing slides
-    const visibleSlides = getVisibleSlides();
-    const visibleElements = visibleSlides.map(({ index }) => slidesRef.current[index]).filter(Boolean);
-    
-    gsap.to(visibleElements, {
-      x: -20,
-      duration: 0.15,
-      ease: "power2.out",
-      onComplete: () => {
-        setActiveIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-        gsap.to(visibleElements, {
-          x: 0,
-          duration: 0.15,
-          ease: "power2.out"
-        });
+    if (slides.length === 0) return;
+    slideDirection.current = 'next';
+    setActiveIndex((prev) => prev + 1);
+  };
+
+  // Helper function to update slide positions in real-time as the user drags
+  const updateSlidePositionsDuringDrag = (diffX: number) => {
+    const isMobile = windowWidth <= 768;
+    const isTablet = windowWidth > 768 && windowWidth <= 1024;
+
+    let xOffset = 1350;
+    if (isMobile) {
+      xOffset = 370;
+    } else if (isTablet) {
+      xOffset = 630;
+    }
+
+    const total = extendedSlides.length;
+    if (total === 0) return;
+
+    extendedSlides.forEach((_, index) => {
+      const slideElement = slidesRef.current[index];
+      if (!slideElement) return;
+
+      const activeIndexMod = activeIndex % total;
+      let diff = index - activeIndexMod;
+      let wrappedDiff = ((diff + total / 2) % total + total) % total - total / 2;
+
+      let x = 0;
+      let scale = 1;
+      let opacity = 0;
+      let zIndex = 0;
+
+      if (wrappedDiff === 0) {
+        x = 0;
+        scale = 1;
+        opacity = 1;
+        zIndex = 20;
+      } else if (wrappedDiff === -1) {
+        x = -xOffset;
+        scale = 1;
+        opacity = 1;
+        zIndex = 10;
+      } else if (wrappedDiff === 1) {
+        x = xOffset;
+        scale = 1;
+        opacity = 1;
+        zIndex = 10;
+      } else if (wrappedDiff < -1) {
+        x = -xOffset * 2;
+        scale = 1;
+        opacity = 0;
+        zIndex = 10;
+      } else {
+        x = xOffset * 2;
+        scale = 1;
+        opacity = 0;
+        zIndex = 10;
       }
+
+      // Dynamically adjust opacity when dragging off-screen slides into viewport bounds
+      let dragOpacity = opacity;
+      if (wrappedDiff === -1 || wrappedDiff === 1 || wrappedDiff === 0) {
+        dragOpacity = 1;
+      } else {
+        const distanceFromCenter = Math.abs(x + diffX);
+        if (distanceFromCenter < xOffset) {
+          dragOpacity = 1 - (distanceFromCenter / xOffset);
+        } else {
+          dragOpacity = 0;
+        }
+      }
+
+      gsap.set(slideElement, {
+        xPercent: -50,
+        yPercent: -50,
+        x: x + diffX,
+        scale: scale,
+        opacity: dragOpacity,
+        zIndex: zIndex
+      });
     });
   };
 
+  // Swipe event handlers (two-finger support)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    // Track the swipe gesture specifically when exactly two fingers are placed on the screen
+    if (e.touches.length === 2) {
+      touchStartX.current = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      touchStartY.current = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+
+    // Move slides in real-time specifically when exactly two fingers are moving together
+    if (e.touches.length === 2) {
+      const currentX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const diffX = currentX - touchStartX.current;
+      updateSlidePositionsDuringDrag(diffX);
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+
+    let endX = touchStartX.current;
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      if (e.changedTouches.length === 2) {
+        endX = (e.changedTouches[0].clientX + e.changedTouches[1].clientX) / 2;
+      } else {
+        endX = e.changedTouches[0].clientX;
+      }
+    }
+    const diffX = endX - touchStartX.current;
+
+    // Threshold of 150px to trigger next/prev transition, otherwise snaps back smoothly
+    if (Math.abs(diffX) > 150) {
+      if (diffX > 0) {
+        prevSlide();
+      } else {
+        nextSlide();
+      }
+    } else {
+      // Snap back smoothly to original positions
+      animateActiveSlide();
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return; // Only trigger for left-clicks
+    touchStartX.current = e.clientX;
+    touchStartY.current = e.clientY;
+    isDragging.current = true;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current || touchStartX.current === null) return;
+    const diffX = e.clientX - touchStartX.current;
+    updateSlidePositionsDuringDrag(diffX);
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isDragging.current || touchStartX.current === null) return;
+    const diffX = e.clientX - touchStartX.current;
+
+    if (Math.abs(diffX) > 150) {
+      if (diffX > 0) {
+        prevSlide();
+      } else {
+        nextSlide();
+      }
+    } else {
+      // Snap back smoothly
+      animateActiveSlide();
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isDragging.current = false;
+  };
+
+  const handleMouseLeave = () => {
+    if (isDragging.current && touchStartX.current !== null) {
+      // Snap back smoothly if mouse leaves drag area
+      animateActiveSlide();
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isDragging.current = false;
+  };
+
   const getSlideClass = (index) => {
-    const baseClass = "relative flex flex-col items-center justify-center bg-[#f5f5f7] rounded-2xl";
-    const sizeClass = index === activeIndex ? "carousel-card-active" : "carousel-card-inactive";
-    
-    if (index === activeIndex) {
+    const total = extendedSlides.length;
+    const activeIndexMod = total > 0 ? activeIndex % total : 0;
+    const baseClass = "absolute flex flex-col items-center justify-center bg-transparent rounded-2xl left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden";
+    const sizeClass = index === activeIndexMod ? "carousel-card-active" : "carousel-card-inactive";
+
+    if (index === activeIndexMod) {
       return `${baseClass} ${sizeClass} z-20`;
     } else {
       return `${baseClass} ${sizeClass} z-10`;
@@ -175,71 +414,73 @@ const HeroCarousel = () => {
   const getSlideStyle = (index) => {
     const isMobile = windowWidth <= 768;
     const isTablet = windowWidth > 768 && windowWidth <= 1024;
-    
-    // Base styles for all cards
-    const baseStyle = {
+
+    // Calculate offsets based on screen size (card width + gap)
+    let xOffset = 1350; // 1300 width + 50 gap (slightly increased)
+    if (isMobile) {
+      xOffset = 370;
+    } else if (isTablet) {
+      xOffset = 630;
+    }
+
+    const total = extendedSlides.length;
+    if (initialActiveIndexRef.current === null && total > 0) {
+      initialActiveIndexRef.current = activeIndex;
+    }
+
+    let x = 0;
+    let scale = 1;
+    let opacity = 0;
+    let zIndex = 0;
+
+    if (total > 0) {
+      const activeIndexMod = (initialActiveIndexRef.current ?? activeIndex) % total;
+      let diff = index - activeIndexMod;
+      let wrappedDiff = ((diff + total / 2) % total + total) % total - total / 2;
+
+      if (wrappedDiff === 0) {
+        x = 0;
+        scale = 1;
+        opacity = 1;
+        zIndex = 20;
+      } else if (wrappedDiff === -1) {
+        x = -xOffset;
+        scale = 1;
+        opacity = 1;
+        zIndex = 10;
+      } else if (wrappedDiff === 1) {
+        x = xOffset;
+        scale = 1;
+        opacity = 1;
+        zIndex = 10;
+      } else if (wrappedDiff < -1) {
+        x = -xOffset * 2;
+        scale = 1;
+        opacity = 0;
+        zIndex = 10; // Keep at 10 to prevent sudden disappearance during transition
+      } else {
+        x = xOffset * 2;
+        scale = 1;
+        opacity = 0;
+        zIndex = 10; // Keep at 10 to prevent sudden disappearance during transition
+      }
+    }
+
+    return {
       fontFamily: "'Albert Sans', sans-serif",
       boxSizing: 'border-box' as const,
-      transition: 'all 0.3s ease'
+      transform: `translate(calc(-50% + ${x}px), -50%) scale(${scale})`,
+      opacity: opacity,
+      zIndex: zIndex,
     };
-
-    // For active card, full size and centered
-    if (index === activeIndex) {
-      return {
-        ...baseStyle,
-        width: isMobile ? '300px' : isTablet ? '450px' : '600px',
-        height: isMobile ? '350px' : isTablet ? '450px' : '500px',
-        zIndex: 20,
-        marginLeft: '0',
-        marginRight: '0'
-      };
-    }
-
-    // For inactive cards, show only tips with negative margins
-    const visibleSlides = getVisibleSlides();
-    const currentSlide = visibleSlides.find(slide => slide.index === index);
-    
-    if (currentSlide?.position === 'left') {
-      // Left card: show only right tip
-      return {
-        ...baseStyle,
-        width: isMobile ? '300px' : isTablet ? '450px' : '600px',
-        height: isMobile ? '350px' : isTablet ? '450px' : '500px',
-        zIndex: 10,
-        marginLeft: isMobile ? '-220px' : isTablet ? '-350px' : '-480px',
-        marginRight: isMobile ? '20px' : isTablet ? '30px' : '40px'
-      };
-    } else if (currentSlide?.position === 'right') {
-      // Right card: show only left tip
-      return {
-        ...baseStyle,
-        width: isMobile ? '300px' : isTablet ? '450px' : '600px',
-        height: isMobile ? '350px' : isTablet ? '450px' : '500px',
-        zIndex: 10,
-        marginLeft: isMobile ? '20px' : isTablet ? '30px' : '40px',
-        marginRight: isMobile ? '-220px' : isTablet ? '-350px' : '-480px'
-      };
-    }
-
-    return baseStyle;
   };
 
-  const getVisibleSlides = () => {
-    const total = slides.length;
-    
-    // Return empty array if no slides available
-    if (total === 0) {
-      return [];
-    }
-    
-    const prev = (activeIndex - 1 + total) % total;
-    const next = (activeIndex + 1) % total;
-    
-    return [
-      { slide: slides[prev], index: prev, position: 'left' },
-      { slide: slides[activeIndex], index: activeIndex, position: 'center' },
-      { slide: slides[next], index: next, position: 'right' }
-    ];
+  const getContainerHeight = () => {
+    const isMobile = windowWidth <= 768;
+    const isTablet = windowWidth > 768 && windowWidth <= 1024;
+    if (isMobile) return '500px';
+    if (isTablet) return '600px';
+    return '740px';
   };
 
   return (
@@ -253,119 +494,126 @@ const HeroCarousel = () => {
         }}
         aria-label="Previous slide"
       >
-        <svg 
-          width="16" 
-          height="16" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="2.5" 
-          strokeLinecap="round" 
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
           strokeLinejoin="round"
           className="sm:w-5 sm:h-5"
         >
-          <path d="m15 18-6-6 6-6"/>
+          <path d="m15 18-6-6 6-6" />
         </svg>
       </button>
 
       {/* Slides Container */}
-      <div className="flex items-start justify-center relative w-full overflow-hidden px-4 sm:px-8">
-        {slides.length === 0 ? (
+      <div
+        className="flex items-center justify-center relative w-full overflow-hidden px-4 sm:px-8 cursor-grab active:cursor-grabbing select-none"
+        style={{ height: getContainerHeight() }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+      >
+        {extendedSlides.length === 0 ? (
           <div className="relative flex flex-col items-center justify-center bg-[#f5f5f7] rounded-2xl min-h-[400px] w-full max-w-4xl">
             <p className="text-gray-500 text-lg">Loading slides...</p>
           </div>
         ) : (
-          getVisibleSlides().map(({ slide, index, position }) => {
+          extendedSlides.map((slide, index) => {
             const imageUrl = slide.image ? getImageUrl(slide.image) : null;
-            
+            const total = extendedSlides.length;
+            const activeIndexMod = total > 0 ? activeIndex % total : 0;
+
             return (
-          <div
-            key={`${slide.id}-${index}-${position}`}
-            ref={el => { slidesRef.current[index] = el; }}
-            className={getSlideClass(index)}
-            style={{
-              ...getSlideStyle(index),
-              backgroundImage: slide.image ? `url("${imageUrl}")` : 'none',
-              backgroundSize: 'cover',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'center center',
-              boxShadow: 'inset 0 0 40px rgba(0, 0, 0, 0.2)'
-            } as React.CSSProperties}
-          >
-            {/* Content Section - Overlaid on background */}
-            <div 
-              ref={el => { contentRef.current[index] = el; }}
-              className="flex flex-col items-center text-center px-4 sm:px-8 lg:px-16 py-4 sm:py-8 relative z-10 w-[70%] sm:w-full mx-auto h-full justify-start pt-16 sm:pt-16"
-            >
-              {/* Main Heading */}
-              <h2 
-                className={`font-normal mb-3 sm:mb-6 leading-tight ${
-                  index === activeIndex 
-                    ? 'text-[28px] sm:text-[40px] lg:text-[56px]' 
-                    : 'text-[20px] sm:text-[30px] lg:text-[40px]'
-                }`}
-                style={{ color: slide.textColor || '#000000' }}
+              <div
+                key={`${slide.id}-${index}`}
+                ref={el => { slidesRef.current[index] = el; }}
+                className={getSlideClass(index)}
+                style={getSlideStyle(index)}
               >
-                {slide.heading.split('\n').map((line, lineIndex) => (
-                  <React.Fragment key={lineIndex}>
-                    {line}
-                    {lineIndex < slide.heading.split('\n').length - 1 && <br />}
-                  </React.Fragment>
-                ))}
-              </h2>
-              
-              {/* Subheading - Now visible on mobile */}
-              <p 
-                className={`mb-3 sm:mb-6 max-w-xs sm:max-w-md ${
-                  index === activeIndex 
-                    ? 'text-[12px] sm:text-[16px] lg:text-[20px]' 
-                    : 'text-[10px] sm:text-[14px] lg:text-[16px]'
-                }`}
-                style={{ color: slide.textColor || '#000000' }}
-              >
-                {slide.subheading}
-              </p>
-              
-              {/* Button - only show on active slide */}
-              {index === activeIndex && (
-                <a
-                  href={slide.buttonLink || '/products'}
-                  ref={buttonRef}
-                  style={{ 
-                    marginTop: '30px',
-                    borderColor: slide.textColor || '#000000',
-                    color: slide.textColor || '#000000'
-                  }}
-                  className="inline-flex items-center border-2 px-4 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-lg font-medium transition-all duration-300 hover:bg-black hover:!text-white group"
-                >
-                  {slide.button}
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="ml-2 transition-transform group-hover:translate-x-1 sm:w-4 sm:h-4"
+                {/* Stable Background Container */}
+                <div className="absolute inset-0 bg-[#f5f5f7] rounded-2xl z-0 pointer-events-none shadow-[inset_0_0_40px_rgba(0,0,0,0.15)]" />
+
+                {/* Slide Image - now a separate absolute layer that slides left/right smoothly */}
+                {slide.image && (
+                  <div
+                    ref={el => { imageRef.current[index] = el; }}
+                    className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden rounded-2xl z-0"
                   >
-                    <path d="m9 18 6-6-6-6"/>
-                  </svg>
-                </a>
-              )}
-            </div>
-            
-            {/* Hidden image ref for GSAP animations */}
-            {slide.image && (
-              <img 
-                ref={el => { imageRef.current[index] = el; }}
-                src={getImageUrl(slide.image)} 
-                alt={slide.heading}
-                className="hidden"
-              />
-            )}
-          </div>
+                    <img
+                      src={imageUrl}
+                      alt={slide.heading}
+                      className="w-full h-full object-cover select-none"
+                    />
+                  </div>
+                )}
+
+                {/* Content Section - Overlaid on background */}
+                <div
+                  ref={el => { contentRef.current[index] = el; }}
+                  className="flex flex-col items-center text-center px-4 sm:px-8 lg:px-16 py-4 sm:py-8 relative z-10 w-[70%] sm:w-full mx-auto h-full justify-start pt-16 sm:pt-16"
+                >
+                  {/* Main Heading */}
+                  <h2
+                    className="font-normal mb-3 sm:mb-6 leading-tight text-[28px] sm:text-[40px] lg:text-[56px]"
+                    style={{
+                      color: slide.textColor || '#000000',
+                      opacity: 0
+                    }}
+                  >
+                    {slide.heading.split('\n').map((line, lineIndex) => (
+                      <React.Fragment key={lineIndex}>
+                        {line}
+                        {lineIndex < slide.heading.split('\n').length - 1 && <br />}
+                      </React.Fragment>
+                    ))}
+                  </h2>
+
+                  {/* Subheading */}
+                  <p
+                    className="mb-3 sm:mb-6 max-w-xs sm:max-w-md text-[12px] sm:text-[16px] lg:text-[20px]"
+                    style={{
+                      color: slide.textColor || '#000000',
+                      opacity: 0
+                    }}
+                  >
+                    {slide.subheading}
+                  </p>
+
+                  {/* Button */}
+                  <a
+                    href={slide.buttonLink || '/products'}
+                    style={{
+                      marginTop: '30px',
+                      borderColor: slide.textColor || '#000000',
+                      color: slide.textColor || '#000000',
+                      opacity: 0
+                    }}
+                    className="inline-flex items-center border-2 px-4 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-lg font-medium transition-colors duration-300 hover:bg-black hover:!text-white group"
+                  >
+                    {slide.button}
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="ml-2 transition-transform group-hover:translate-x-1 sm:w-4 sm:h-4"
+                    >
+                      <path d="m9 18 6-6-6-6" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
             );
           })
         )}
@@ -380,18 +628,18 @@ const HeroCarousel = () => {
         }}
         aria-label="Next slide"
       >
-        <svg 
-          width="16" 
-          height="16" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="2.5" 
-          strokeLinecap="round" 
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
           strokeLinejoin="round"
           className="sm:w-5 sm:h-5"
         >
-          <path d="m9 18 6-6-6-6"/>
+          <path d="m9 18 6-6-6-6" />
         </svg>
       </button>
     </section>
